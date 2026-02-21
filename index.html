@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HoopsHype Reddit Intel</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-primary: #0f1523;
+  --bg-secondary: #1a2236;
+  --bg-tertiary: #232d44;
+  --bg-card: #1e2940;
+  --text-primary: #e8eaf0;
+  --text-secondary: #8892a4;
+  --text-muted: #5a6478;
+  --accent: #f97316;
+  --accent-hover: #fb923c;
+  --accent-dim: #f9731633;
+  --border: #2a3550;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #eab308;
+  --info: #3b82f6;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+html { font-size: 14px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+.logo-sub { font-size: 0.85rem; color: var(--text-secondary); }
+.api-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; color: var(--text-secondary);
+  background: var(--bg-tertiary); padding: 4px 10px;
+  border-radius: 20px;
+}
+.api-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-muted);
+}
+.api-dot.online { background: var(--success); }
+.api-dot.offline { background: var(--danger); }
+
+/* ===== TAB NAV ===== */
+.tab-nav {
+  display: flex;
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.tab-btn {
+  background: none; border: none; color: var(--text-secondary);
+  padding: 12px 18px; cursor: pointer; white-space: nowrap;
+  font-size: 0.85rem; font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+.tab-btn:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ===== MAIN CONTENT ===== */
+.main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ===== FORM CONTROLS ===== */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label {
+  font-size: 0.75rem; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+}
+input[type="text"], input[type="date"], input[type="number"], select {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  min-width: 160px;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); }
+.btn {
+  background: var(--accent);
+  color: #fff; border: none;
+  padding: 8px 18px; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; font-size: 0.85rem;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--accent-hover); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+.btn-secondary { background: var(--bg-tertiary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-success { background: var(--success); }
+.btn-info { background: var(--info); }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+th {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  text-align: left;
+  padding: 10px 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover { color: var(--accent); }
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  max-width: 400px;
+}
+tr:hover { background: var(--bg-tertiary); }
+.sort-arrow { margin-left: 4px; opacity: 0.5; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 1rem; font-weight: 600;
+  margin-bottom: 8px; color: var(--accent);
+}
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; }
+
+/* ===== CHART ===== */
+.chart-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 16px 0;
+  position: relative;
+}
+.chart-container canvas { max-height: 350px; }
+
+/* ===== LOADING & STATES ===== */
+.spinner {
+  display: inline-block;
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 40px;
+  color: var(--text-secondary);
+}
+.progress-bar {
+  width: 100%; height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+  width: 0%;
+}
+.empty-state {
+  text-align: center; padding: 40px;
+  color: var(--text-muted);
+}
+.error-msg {
+  background: var(--danger);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  margin: 10px 0;
+  font-size: 0.85rem;
+}
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--bg-tertiary); color: var(--text-primary);
+  padding: 10px 20px; border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  z-index: 1000; font-size: 0.85rem;
+  animation: fadeInUp 0.3s;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== COMMENT CARD ===== */
+.comment-card {
+  background: var(--bg-tertiary);
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  margin: 8px 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.comment-meta {
+  font-size: 0.75rem; color: var(--text-secondary);
+  margin-top: 6px;
+  display: flex; gap: 12px; flex-wrap: wrap;
+  align-items: center;
+}
+.comment-body { white-space: pre-wrap; word-break: break-word; }
+.comment-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-orange { background: var(--accent-dim); color: var(--accent); }
+.badge-green { background: #22c55e33; color: var(--success); }
+.badge-blue { background: #3b82f633; color: var(--info); }
+.badge-red { background: #ef444433; color: var(--danger); }
+
+/* ===== WORD CLOUD ===== */
+.word-cloud {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 16px; justify-content: center;
+}
+.word-tag {
+  background: var(--bg-tertiary);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+}
+
+/* ===== TEAM SELECT GRID ===== */
+.team-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius);
+}
+.team-checkbox { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; cursor: pointer; }
+.team-checkbox input { accent-color: var(--accent); }
+
+/* ===== EXPAND ===== */
+.expandable { cursor: pointer; }
+.expand-content { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.expand-content.open { display: block; }
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center; padding: 20px;
+  color: var(--text-muted); font-size: 0.75rem;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .header { flex-direction: column; gap: 8px; padding: 10px; }
+  .tab-btn { padding: 10px 12px; font-size: 0.8rem; }
+  .controls { flex-direction: column; }
+  .form-group { width: 100%; }
+  input[type="text"], input[type="date"], input[type="number"], select { width: 100%; min-width: unset; }
+  .card-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .main { padding: 10px; }
+}
+
+/* ===== MARKDOWN BRIEF ===== */
+.markdown-brief {
+  background: var(--bg-tertiary);
+  padding: 16px;
+  border-radius: var(--radius);
+  white-space: pre-wrap;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo">HoopsHype Reddit Intel</div>
+      <div class="logo-sub">NBA Reddit Intelligence Dashboard</div>
+    </div>
+  </div>
+  <div class="api-status">
+    <span class="api-dot" id="apiDot"></span>
+    <span id="apiStatusText">Checking API...</span>
+  </div>
+</header>
+
+<!-- ===== TAB NAV ===== -->
+<nav class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-tab="rumors">Rumor & Buzz Tracker</button>
+  <button class="tab-btn" data-tab="trends">Trend Detection</button>
+  <button class="tab-btn" data-tab="sentiment">Fan Sentiment</button>
+  <button class="tab-btn" data-tab="perception">Player Perception</button>
+  <button class="tab-btn" data-tab="social">Content Sourcing</button>
+  <button class="tab-btn" data-tab="growth">Subreddit Growth</button>
+  <button class="tab-btn" data-tab="history">Historical Reactions</button>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+<!-- TAB 1: RUMOR TRACKER -->
+<div class="tab-panel active" id="tab-rumors">
+  <div class="controls">
+    <div class="form-group">
+      <label>Keyword / Player</label>
+      <input type="text" id="rumorQuery" placeholder='e.g. "Jimmy Butler trade"'>
+    </div>
+    <div class="form-group">
+      <label>From</label>
+      <input type="date" id="rumorAfter">
+    </div>
+    <div class="form-group">
+      <label>To</label>
+      <input type="date" id="rumorBefore">
+    </div>
+    <div class="form-group">
+      <label>Sort By</label>
+      <select id="rumorSort">
+        <option value="date">Date</option>
+        <option value="score">Score</option>
+        <option value="comments">Comments</option>
+      </select>
+    </div>
+    <button class="btn" onclick="searchRumors()">Search</button>
+    <button class="btn btn-secondary" onclick="exportRumorCSV()">Export CSV</button>
+  </div>
+  <div id="rumorChart" class="chart-container" style="display:none"><canvas id="rumorChartCanvas"></canvas></div>
+  <div id="rumorResults"><div class="empty-state">Enter a keyword and click Search to find NBA rumors and buzz.</div></div>
+</div>
+
+<!-- TAB 2: TREND DETECTION -->
+<div class="tab-panel" id="tab-trends">
+  <div class="controls">
+    <div class="form-group">
+      <label>Time Period</label>
+      <select id="trendPeriod">
+        <option value="7">Last 7 Days</option>
+        <option value="30" selected>Last 30 Days</option>
+        <option value="90">Last 90 Days</option>
+      </select>
+    </div>
+    <button class="btn" onclick="loadTrends()">Analyze Trends</button>
+  </div>
+  <div id="trendStats"></div>
+  <div id="trendChart" class="chart-container" style="display:none"><canvas id="trendChartCanvas"></canvas></div>
+  <div id="trendUnderserved" style="display:none"></div>
+  <div id="trendResults"><div class="empty-state">Select a time period and click Analyze to detect trending topics on r/nba.</div></div>
+</div>
+
+<!-- TAB 3: FAN SENTIMENT -->
+<div class="tab-panel" id="tab-sentiment">
+  <div class="controls">
+    <div class="form-group">
+      <label>Team</label>
+      <select id="sentimentTeam"></select>
+    </div>
+    <div class="form-group">
+      <label>Compare With</label>
+      <select id="sentimentTeam2"><option value="">-- None --</option></select>
+    </div>
+    <div class="form-group">
+      <label>From</label>
+      <input type="date" id="sentimentAfter">
+    </div>
+    <div class="form-group">
+      <label>To</label>
+      <input type="date" id="sentimentBefore">
+    </div>
+    <div class="form-group">
+      <label>Precision</label>
+      <select id="sentimentPrecision">
+        <option value="day" selected>Daily</option>
+        <option value="week">Weekly</option>
+        <option value="month">Monthly</option>
+      </select>
+    </div>
+    <button class="btn" onclick="loadSentiment()">Load Data</button>
+  </div>
+  <div id="sentimentCharts"></div>
+  <div id="sentimentResults"><div class="empty-state">Select a team and date range to view fan activity trends.</div></div>
+</div>
+
+<!-- TAB 4: PLAYER PERCEPTION -->
+<div class="tab-panel" id="tab-perception">
+  <div class="controls">
+    <div class="form-group">
+      <label>Player Name</label>
+      <input type="text" id="perceptionPlayer" placeholder="e.g. LeBron James">
+    </div>
+    <div class="form-group">
+      <label>Date Range</label>
+      <select id="perceptionRange">
+        <option value="7">Last 7 Days</option>
+        <option value="30" selected>Last 30 Days</option>
+        <option value="90">Last 90 Days</option>
+      </select>
+    </div>
+    <button class="btn" onclick="analyzePerception()">Analyze</button>
+  </div>
+  <div class="form-group" style="margin-bottom:16px">
+    <label>Select Team Subreddits (up to 5)</label>
+    <div class="team-select-grid" id="perceptionTeams"></div>
+  </div>
+  <div id="perceptionResults"><div class="empty-state">Enter a player name and select subreddits to analyze perception across fanbases.</div></div>
+</div>
+
+<!-- TAB 5: SOCIAL CONTENT -->
+<div class="tab-panel" id="tab-social">
+  <div class="controls">
+    <div class="form-group">
+      <label>Keyword / Player</label>
+      <input type="text" id="socialQuery" placeholder='e.g. "Wembanyama"'>
+    </div>
+    <div class="form-group">
+      <label>Min Score</label>
+      <input type="number" id="socialMinScore" value="100" min="1">
+    </div>
+    <div class="form-group">
+      <label>From</label>
+      <input type="date" id="socialAfter">
+    </div>
+    <div class="form-group">
+      <label>To</label>
+      <input type="date" id="socialBefore">
+    </div>
+    <button class="btn" onclick="findViralTakes()">Find Viral Takes</button>
+    <button class="btn btn-secondary" onclick="batchExportSocial(10)">Export Top 10</button>
+    <button class="btn btn-secondary" onclick="batchExportSocial(25)">Export Top 25</button>
+    <button class="btn btn-secondary" onclick="batchExportSocial(50)">Export Top 50</button>
+  </div>
+  <div id="socialResults"><div class="empty-state">Search for viral takes to source content for social media.</div></div>
+</div>
+
+<!-- TAB 6: SUBREDDIT GROWTH -->
+<div class="tab-panel" id="tab-growth">
+  <div class="controls">
+    <button class="btn" onclick="loadGrowthData()">Load All Team Data</button>
+    <span class="form-group" style="flex:1">
+      <div class="progress-bar" id="growthProgress" style="display:none"><div class="progress-fill" id="growthProgressFill"></div></div>
+    </span>
+  </div>
+  <div id="growthChart" class="chart-container" style="display:none"><canvas id="growthChartCanvas"></canvas></div>
+  <div id="growthResults"><div class="empty-state">Click "Load All Team Data" to fetch activity data for all 30 NBA team subreddits. This makes many API calls and may take a minute.</div></div>
+</div>
+
+<!-- TAB 7: HISTORICAL REACTIONS -->
+<div class="tab-panel" id="tab-history">
+  <div class="controls">
+    <div class="form-group">
+      <label>Search Query</label>
+      <input type="text" id="historyQuery" placeholder='e.g. "Harden trade"'>
+    </div>
+    <div class="form-group">
+      <label>From</label>
+      <input type="date" id="historyAfter">
+    </div>
+    <div class="form-group">
+      <label>To</label>
+      <input type="date" id="historyBefore">
+    </div>
+    <button class="btn" onclick="searchHistory()">Search</button>
+    <button class="btn btn-secondary" onclick="generateBrief()">Generate Article Brief</button>
+  </div>
+  <div id="historyResults"><div class="empty-state">Search for any NBA event to see how Reddit reacted. Try "Kawhi Clippers" or "2019 draft".</div></div>
+  <div id="historyBrief" style="display:none"></div>
+</div>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  Built for HoopsHype editorial research. Data via <a href="https://arctic-shift.photon-reddit.com" target="_blank">Arctic Shift</a>.
+</footer>
+
+<script>
+// =============================================================================
+// CONFIGURATION
+// =============================================================================
+const API_BASE = 'https://arctic-shift.photon-reddit.com/api';
+const CACHE_TTL = 3600000; // 1 hour
+const RATE_LIMIT_MS = 500;
+
+const NBA_TEAMS = {
+  "Atlanta Hawks": "AtlantaHawks",
+  "Boston Celtics": "bostonceltics",
+  "Brooklyn Nets": "GoNets",
+  "Charlotte Hornets": "CharlotteHornets",
+  "Chicago Bulls": "chicagobulls",
+  "Cleveland Cavaliers": "clevelandcavs",
+  "Dallas Mavericks": "Mavericks",
+  "Denver Nuggets": "denvernuggets",
+  "Detroit Pistons": "DetroitPistons",
+  "Golden State Warriors": "warriors",
+  "Houston Rockets": "rockets",
+  "Indiana Pacers": "pacers",
+  "LA Clippers": "LAClippers",
+  "Los Angeles Lakers": "lakers",
+  "Memphis Grizzlies": "memphisgrizzlies",
+  "Miami Heat": "heat",
+  "Milwaukee Bucks": "MkeBucks",
+  "Minnesota Timberwolves": "timberwolves",
+  "New Orleans Pelicans": "NOLAPelicans",
+  "New York Knicks": "NYKnicks",
+  "Oklahoma City Thunder": "Thunder",
+  "Orlando Magic": "OrlandoMagic",
+  "Philadelphia 76ers": "sixers",
+  "Phoenix Suns": "suns",
+  "Portland Trail Blazers": "ripcity",
+  "Sacramento Kings": "kings",
+  "San Antonio Spurs": "NBASpurs",
+  "Toronto Raptors": "torontoraptors",
+  "Utah Jazz": "UtahJazz",
+  "Washington Wizards": "washingtonwizards"
+};
+
+const SUB_TO_TEAM = {};
+Object.entries(NBA_TEAMS).forEach(([team, sub]) => { SUB_TO_TEAM[sub.toLowerCase()] = team; });
+
+const TOPIC_KEYWORDS = {
+  trade: ['trade','traded','trading','deal','swap','package','assets'],
+  GOAT: ['goat','greatest','all-time','all time','legacy','mount rushmore'],
+  draft: ['draft','pick','prospect','lottery','combine','mock draft'],
+  'free agency': ['free agent','free agency','signing','sign','unrestricted','restricted'],
+  rookie: ['rookie','roty','first year','debut'],
+  MVP: ['mvp','most valuable','award','frontrunner'],
+  injury: ['injury','injured','acl','torn','surgery','rehab','out for','sidelined','day-to-day'],
+  contract: ['contract','extension','max','supermax','salary','cap space','money']
+};
+
+const NBA_EVENTS = [
+  { date: '2026-02-05', label: 'Trade Deadline' },
+  { date: '2026-06-25', label: 'NBA Draft' },
+  { date: '2026-06-30', label: 'Free Agency' },
+  { date: '2025-10-22', label: 'Season Start' },
+  { date: '2026-04-13', label: 'Playoffs Start' }
+];
+
+const STOPWORDS = new Set(['the','a','an','is','are','was','were','be','been','being','have','has','had',
+  'do','does','did','will','would','could','should','may','might','shall','can','need','must',
+  'to','of','in','for','on','with','at','by','from','as','into','through','during','before',
+  'after','above','below','between','out','off','over','under','again','further','then','once',
+  'here','there','when','where','why','how','all','both','each','few','more','most','other',
+  'some','such','no','nor','not','only','own','same','so','than','too','very','just','about',
+  'up','down','and','but','or','if','it','its','he','she','they','them','his','her','their',
+  'this','that','these','those','i','me','my','we','us','our','you','your','what','which','who',
+  'whom','get','got','like','really','think','know','make','go','going','even','still','also',
+  'much','many','well','way','back','good','new','first','last','long','great','little','right',
+  'old','big','high','different','small','large','next','one','two','dont','doesnt','didnt',
+  'thats','hes','shes','theyre','youre','im','wont','cant','because','been','said','game',
+  'player','team','season','year','nba','play','time','point','guy','people']);
+
+// =============================================================================
+// UTILITIES: Rate Limiter
+// =============================================================================
+const RateLimiter = (() => {
+  let lastCall = 0;
+  return async () => {
+    const now = Date.now();
+    const wait = RATE_LIMIT_MS - (now - lastCall);
+    if (wait > 0) await new Promise(r => setTimeout(r, wait));
+    lastCall = Date.now();
+  };
+})();
+
+// =============================================================================
+// UTILITIES: Cache
+// =============================================================================
+const Cache = {
+  get(key) {
+    try {
+      const item = localStorage.getItem('rhi_' + key);
+      if (!item) return null;
+      const { data, ts } = JSON.parse(item);
+      if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem('rhi_' + key); return null; }
+      return data;
+    } catch { return null; }
+  },
+  set(key, data) {
+    try {
+      localStorage.setItem('rhi_' + key, JSON.stringify({ data, ts: Date.now() }));
+    } catch { /* storage full, ignore */ }
+  }
+};
+
+// =============================================================================
+// UTILITIES: API Client
+// =============================================================================
+async function api(endpoint, params = {}) {
+  const filtered = {};
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') filtered[k] = v;
+  });
+  const qs = new URLSearchParams(filtered).toString();
+  const url = `${API_BASE}${endpoint}${qs ? '?' + qs : ''}`;
+  const cacheKey = url;
+  const cached = Cache.get(cacheKey);
+  if (cached) return cached;
+
+  await RateLimiter();
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+  const json = await res.json();
+  Cache.set(cacheKey, json);
+  return json;
+}
+
+// =============================================================================
+// UTILITIES: Helpers
+// =============================================================================
+function formatDate(epoch) {
+  if (!epoch) return '';
+  const d = new Date(typeof epoch === 'number' ? epoch * 1000 : epoch);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatDateISO(epoch) {
+  const d = new Date(typeof epoch === 'number' ? epoch * 1000 : epoch);
+  return d.toISOString().split('T')[0];
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split('T')[0];
+}
+
+function truncate(str, len) {
+  if (!str) return '';
+  return str.length > len ? str.substring(0, len) + '...' : str;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function postPermalink(post) {
+  return `https://www.reddit.com/r/${post.subreddit}/comments/${(post.id || '').replace('t3_','')}/`;
+}
+
+function commentPermalink(comment) {
+  const linkId = (comment.link_id || '').replace('t3_', '');
+  const commentId = (comment.id || '').replace('t1_', '');
+  return `https://www.reddit.com/r/${comment.subreddit}/comments/${linkId}/_/${commentId}/`;
+}
+
+function showLoading(el) {
+  el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading...</div>';
+}
+
+function showError(el, msg) {
+  el.innerHTML = `<div class="error-msg">${escapeHtml(msg)}</div>`;
+}
+
+function showEmpty(el, msg) {
+  el.innerHTML = `<div class="empty-state">${escapeHtml(msg)}</div>`;
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Copied to clipboard!');
+  } catch {
+    toast('Copy failed — try manually.');
+  }
+}
+
+function downloadFile(content, filename, type = 'text/csv') {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Chart.js defaults
+Chart.defaults.color = '#8892a4';
+Chart.defaults.borderColor = '#2a3550';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+
+const charts = {};
+function getOrCreateChart(canvasId, config) {
+  if (charts[canvasId]) { charts[canvasId].destroy(); }
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  charts[canvasId] = new Chart(ctx, config);
+  return charts[canvasId];
+}
+
+const CHART_COLORS = ['#f97316','#3b82f6','#22c55e','#eab308','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+
+// =============================================================================
+// TAB NAVIGATION
+// =============================================================================
+function showTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabId));
+}
+
+document.getElementById('tabNav').addEventListener('click', e => {
+  if (e.target.classList.contains('tab-btn')) showTab(e.target.dataset.tab);
+});
+
+// =============================================================================
+// TAB 1: RUMOR & BUZZ TRACKER
+// =============================================================================
+let rumorData = [];
+const RUMOR_SUBS = ['nba', 'nbadiscussion', 'NBA_TradeDiscussions'];
+
+async function searchRumors() {
+  const query = document.getElementById('rumorQuery').value.trim();
+  if (!query) { toast('Please enter a search keyword.'); return; }
+  const after = document.getElementById('rumorAfter').value;
+  const before = document.getElementById('rumorBefore').value;
+  const resultsEl = document.getElementById('rumorResults');
+  showLoading(resultsEl);
+
+  try {
+    const allPosts = [];
+    for (const sub of RUMOR_SUBS) {
+      const res = await api('/posts/search', {
+        subreddit: sub, query, after, before, limit: 100,
+        fields: 'id,title,subreddit,score,num_comments,created_utc,author'
+      });
+      if (res.data) allPosts.push(...res.data);
+    }
+    rumorData = allPosts;
+    sortAndRenderRumors();
+
+    // Time series chart
+    try {
+      const aggRes = await api('/posts/search/aggregate', {
+        subreddit: 'nba', query, aggregate: 'created_utc',
+        frequency: 'day', after, before
+      });
+      if (aggRes.data && aggRes.data.length > 0) {
+        document.getElementById('rumorChart').style.display = 'block';
+        const labels = aggRes.data.map(d => formatDate(d.created_utc));
+        const values = aggRes.data.map(d => parseInt(d.count));
+        getOrCreateChart('rumorChartCanvas', {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: `"${query}" mentions/day on r/nba`,
+              data: values,
+              borderColor: '#f97316',
+              backgroundColor: '#f9731633',
+              fill: true, tension: 0.3, pointRadius: 2
+            }]
+          },
+          options: { responsive: true, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }
+        });
+      }
+    } catch {}
+  } catch (err) {
+    showError(resultsEl, 'Error fetching rumors: ' + err.message);
+  }
+}
+
+function sortAndRenderRumors() {
+  const sortBy = document.getElementById('rumorSort').value;
+  const sorted = [...rumorData];
+  if (sortBy === 'score') sorted.sort((a, b) => (b.score || 0) - (a.score || 0));
+  else if (sortBy === 'comments') sorted.sort((a, b) => (b.num_comments || 0) - (a.num_comments || 0));
+  else sorted.sort((a, b) => (b.created_utc || 0) - (a.created_utc || 0));
+  renderRumorTable(sorted);
+}
+
+document.getElementById('rumorSort').addEventListener('change', sortAndRenderRumors);
+
+function renderRumorTable(posts) {
+  const el = document.getElementById('rumorResults');
+  if (!posts.length) { showEmpty(el, 'No results found.'); return; }
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">${posts.length}</div><div class="stat-label">Posts Found</div></div>
+      <div class="stat-card"><div class="stat-value">${posts.reduce((s,p) => s + (p.score||0), 0).toLocaleString()}</div><div class="stat-label">Total Score</div></div>
+      <div class="stat-card"><div class="stat-value">${posts.reduce((s,p) => s + (p.num_comments||0), 0).toLocaleString()}</div><div class="stat-label">Total Comments</div></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Title</th><th>Subreddit</th><th>Score</th><th>Comments</th><th>Date</th><th>Link</th></tr></thead>
+      <tbody>${posts.map(p => `
+        <tr>
+          <td>${escapeHtml(truncate(p.title, 80))}</td>
+          <td><span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span></td>
+          <td>${(p.score||0).toLocaleString()}</td>
+          <td>${(p.num_comments||0).toLocaleString()}</td>
+          <td>${formatDate(p.created_utc)}</td>
+          <td><a href="${postPermalink(p)}" target="_blank">View</a></td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+function exportRumorCSV() {
+  if (!rumorData.length) { toast('No data to export.'); return; }
+  const header = 'Title,Subreddit,Score,Comments,Date,URL\n';
+  const rows = rumorData.map(p =>
+    `"${(p.title||'').replace(/"/g,'""')}",r/${p.subreddit},${p.score||0},${p.num_comments||0},${formatDateISO(p.created_utc)},${postPermalink(p)}`
+  ).join('\n');
+  downloadFile(header + rows, 'rumor_results.csv');
+  toast('CSV exported!');
+}
+
+// =============================================================================
+// TAB 2: TREND DETECTION & CONTENT IDEAS
+// =============================================================================
+let trendData = [];
+
+async function loadTrends() {
+  const days = parseInt(document.getElementById('trendPeriod').value);
+  const resultsEl = document.getElementById('trendResults');
+  showLoading(resultsEl);
+
+  try {
+    const after = daysAgo(days);
+    const res = await api('/posts/search', {
+      subreddit: 'nba', after, limit: 'auto', sort: 'desc',
+      fields: 'id,title,subreddit,score,num_comments,created_utc,author'
+    });
+    trendData = (res.data || []).sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    // Categorize posts
+    const topics = {};
+    Object.keys(TOPIC_KEYWORDS).forEach(t => { topics[t] = { posts: [], totalScore: 0, totalComments: 0 }; });
+    topics['other'] = { posts: [], totalScore: 0, totalComments: 0 };
+
+    trendData.forEach(post => {
+      const titleLower = (post.title || '').toLowerCase();
+      let matched = false;
+      Object.entries(TOPIC_KEYWORDS).forEach(([topic, keywords]) => {
+        if (keywords.some(kw => titleLower.includes(kw))) {
+          topics[topic].posts.push(post);
+          topics[topic].totalScore += (post.score || 0);
+          topics[topic].totalComments += (post.num_comments || 0);
+          matched = true;
+        }
+      });
+      if (!matched) {
+        topics['other'].posts.push(post);
+        topics['other'].totalScore += (post.score || 0);
+        topics['other'].totalComments += (post.num_comments || 0);
+      }
+    });
+
+    // Stats
+    document.getElementById('trendStats').innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-value">${trendData.length}</div><div class="stat-label">Posts Analyzed</div></div>
+        <div class="stat-card"><div class="stat-value">${Object.keys(topics).filter(t => topics[t].posts.length > 0).length}</div><div class="stat-label">Topics Detected</div></div>
+        <div class="stat-card"><div class="stat-value">${trendData.length > 0 ? Math.round(trendData.reduce((s,p) => s + (p.score||0), 0) / trendData.length).toLocaleString() : 0}</div><div class="stat-label">Avg Score</div></div>
+      </div>`;
+
+    // Bar chart
+    const topicNames = Object.keys(topics).filter(t => t !== 'other' && topics[t].posts.length > 0);
+    const engagement = topicNames.map(t => topics[t].totalScore + topics[t].totalComments);
+    document.getElementById('trendChart').style.display = 'block';
+    getOrCreateChart('trendChartCanvas', {
+      type: 'bar',
+      data: {
+        labels: topicNames.map(t => t.charAt(0).toUpperCase() + t.slice(1)),
+        datasets: [{
+          label: 'Total Engagement (Score + Comments)',
+          data: engagement,
+          backgroundColor: CHART_COLORS.slice(0, topicNames.length)
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    // Underserved topics
+    const underserved = topicNames
+      .filter(t => topics[t].posts.length > 0)
+      .map(t => ({
+        topic: t,
+        count: topics[t].posts.length,
+        avgScore: Math.round(topics[t].totalScore / topics[t].posts.length),
+        totalEngagement: topics[t].totalScore + topics[t].totalComments
+      }))
+      .sort((a, b) => b.avgScore - a.avgScore);
+
+    const avgAvgScore = underserved.reduce((s, u) => s + u.avgScore, 0) / underserved.length;
+    const highPerformers = underserved.filter(u => u.avgScore > avgAvgScore && u.count < trendData.length / Object.keys(topics).length);
+
+    const underEl = document.getElementById('trendUnderserved');
+    if (highPerformers.length > 0) {
+      underEl.style.display = 'block';
+      underEl.innerHTML = `<div class="card"><div class="card-title">Underserved Topics (High Avg Score, Low Post Count)</div>
+        <div class="table-wrap"><table><thead><tr><th>Topic</th><th>Post Count</th><th>Avg Score</th><th>Total Engagement</th></tr></thead>
+        <tbody>${highPerformers.map(u => `<tr><td><span class="badge badge-green">${u.topic}</span></td><td>${u.count}</td><td>${u.avgScore.toLocaleString()}</td><td>${u.totalEngagement.toLocaleString()}</td></tr>`).join('')}</tbody></table></div></div>`;
+    } else {
+      underEl.style.display = 'none';
+    }
+
+    // Results grouped by topic
+    let html = '';
+    topicNames.sort((a, b) => (topics[b].totalScore + topics[b].totalComments) - (topics[a].totalScore + topics[a].totalComments));
+    topicNames.forEach(topic => {
+      const tp = topics[topic];
+      const topPosts = tp.posts.slice(0, 10);
+      html += `<div class="card"><div class="card-title">${topic.charAt(0).toUpperCase() + topic.slice(1)} <span class="badge badge-blue">${tp.posts.length} posts</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Title</th><th>Score</th><th>Comments</th><th>Date</th><th>Link</th></tr></thead>
+        <tbody>${topPosts.map(p => `<tr><td>${escapeHtml(truncate(p.title, 70))}</td><td>${(p.score||0).toLocaleString()}</td><td>${(p.num_comments||0).toLocaleString()}</td><td>${formatDate(p.created_utc)}</td><td><a href="${postPermalink(p)}" target="_blank">View</a></td></tr>`).join('')}</tbody></table></div></div>`;
+    });
+    resultsEl.innerHTML = html || '<div class="empty-state">No categorized posts found.</div>';
+
+  } catch (err) {
+    showError(resultsEl, 'Error loading trends: ' + err.message);
+  }
+}
+
+// =============================================================================
+// TAB 3: FAN SENTIMENT TIME SERIES
+// =============================================================================
+async function loadSentiment() {
+  const team1Sub = document.getElementById('sentimentTeam').value;
+  const team2Sub = document.getElementById('sentimentTeam2').value;
+  const after = document.getElementById('sentimentAfter').value;
+  const before = document.getElementById('sentimentBefore').value;
+  const precision = document.getElementById('sentimentPrecision').value;
+  const chartsEl = document.getElementById('sentimentCharts');
+  const resultsEl = document.getElementById('sentimentResults');
+  showLoading(resultsEl);
+
+  try {
+    const team1Name = SUB_TO_TEAM[team1Sub.toLowerCase()] || team1Sub;
+
+    async function fetchTeamData(sub) {
+      const [posts, comments, scores] = await Promise.all([
+        api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: precision, after, before }),
+        api('/comments/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: precision, after, before }),
+        api('/time_series', { key: `r/${sub}/posts/sum_score`, precision, after, before })
+      ]);
+      return { posts: posts.data || [], comments: comments.data || [], scores: scores.data || [] };
+    }
+
+    const data1 = await fetchTeamData(team1Sub);
+    let data2 = null;
+    let team2Name = '';
+    if (team2Sub) {
+      team2Name = SUB_TO_TEAM[team2Sub.toLowerCase()] || team2Sub;
+      data2 = await fetchTeamData(team2Sub);
+    }
+
+    if (!team2Sub) {
+      // Single team view
+      const labels = data1.posts.map(d => formatDate(d.created_utc));
+      const postCounts = data1.posts.map(d => parseInt(d.count));
+      const commentCounts = data1.comments.map(d => parseInt(d.count));
+      const scoreValues = data1.scores.map(d => d.value || 0);
+
+      chartsEl.innerHTML = '<div class="chart-container"><canvas id="sentimentMainChart"></canvas></div>';
+      getOrCreateChart('sentimentMainChart', {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'Posts', data: postCounts, borderColor: '#f97316', backgroundColor: '#f9731622', fill: true, tension: 0.3, pointRadius: 2, yAxisID: 'y' },
+            { label: 'Comments', data: commentCounts, borderColor: '#3b82f6', backgroundColor: '#3b82f622', fill: true, tension: 0.3, pointRadius: 2, yAxisID: 'y' },
+            { label: 'Total Score', data: scoreValues, borderColor: '#22c55e', backgroundColor: '#22c55e22', fill: false, tension: 0.3, pointRadius: 2, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            title: { display: true, text: `r/${team1Sub} Activity — ${team1Name}`, color: '#e8eaf0' }
+          },
+          scales: {
+            y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: 'Count' } },
+            y1: { type: 'linear', position: 'right', beginAtZero: true, title: { display: true, text: 'Score' }, grid: { drawOnChartArea: false } }
+          }
+        }
+      });
+
+      // Show event markers as text
+      const eventsInRange = NBA_EVENTS.filter(e => {
+        const ed = new Date(e.date);
+        const ad = after ? new Date(after) : new Date(0);
+        const bd = before ? new Date(before) : new Date();
+        return ed >= ad && ed <= bd;
+      });
+      let eventHtml = '';
+      if (eventsInRange.length > 0) {
+        eventHtml = '<div class="card"><div class="card-title">NBA Events in Range</div>' +
+          eventsInRange.map(e => `<span class="badge badge-orange" style="margin:4px">${e.label} (${e.date})</span>`).join('') + '</div>';
+      }
+      resultsEl.innerHTML = eventHtml || '';
+
+    } else {
+      // Compare mode
+      const labels1 = data1.posts.map(d => formatDate(d.created_utc));
+      const labels2 = data2.posts.map(d => formatDate(d.created_utc));
+      const allLabels = [...new Set([...labels1, ...labels2])].sort();
+
+      function alignData(data, labels, allLabels) {
+        const map = {};
+        labels.forEach((l, i) => { map[l] = parseInt(data[i]?.count || 0); });
+        return allLabels.map(l => map[l] || 0);
+      }
+
+      chartsEl.innerHTML = `
+        <div class="compare-grid">
+          <div class="chart-container"><canvas id="sentCompare1"></canvas></div>
+          <div class="chart-container"><canvas id="sentCompare2"></canvas></div>
+        </div>`;
+
+      getOrCreateChart('sentCompare1', {
+        type: 'line',
+        data: {
+          labels: allLabels,
+          datasets: [
+            { label: `r/${team1Sub} Posts`, data: alignData(data1.posts, labels1, allLabels), borderColor: '#f97316', tension: 0.3, pointRadius: 1 },
+            { label: `r/${team2Sub} Posts`, data: alignData(data2.posts, labels2, allLabels), borderColor: '#3b82f6', tension: 0.3, pointRadius: 1 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { title: { display: true, text: 'Posts Comparison', color: '#e8eaf0' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      getOrCreateChart('sentCompare2', {
+        type: 'line',
+        data: {
+          labels: allLabels,
+          datasets: [
+            { label: `r/${team1Sub} Comments`, data: alignData(data1.comments, labels1, allLabels), borderColor: '#f97316', tension: 0.3, pointRadius: 1 },
+            { label: `r/${team2Sub} Comments`, data: alignData(data2.comments, labels2, allLabels), borderColor: '#3b82f6', tension: 0.3, pointRadius: 1 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { title: { display: true, text: 'Comments Comparison', color: '#e8eaf0' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      resultsEl.innerHTML = '';
+    }
+  } catch (err) {
+    showError(resultsEl, 'Error loading sentiment data: ' + err.message);
+  }
+}
+
+// =============================================================================
+// TAB 4: PLAYER PERCEPTION ANALYZER
+// =============================================================================
+async function analyzePerception() {
+  const player = document.getElementById('perceptionPlayer').value.trim();
+  if (!player) { toast('Please enter a player name.'); return; }
+  const days = parseInt(document.getElementById('perceptionRange').value);
+  const after = daysAgo(days);
+  const resultsEl = document.getElementById('perceptionResults');
+  showLoading(resultsEl);
+
+  const selectedSubs = ['nba'];
+  document.querySelectorAll('#perceptionTeams input:checked').forEach(cb => {
+    if (selectedSubs.length < 6) selectedSubs.push(cb.value);
+  });
+
+  try {
+    const subResults = {};
+    for (const sub of selectedSubs) {
+      const res = await api('/comments/search', {
+        subreddit: sub, body: player, after, limit: 100, sort: 'desc',
+        fields: 'id,body,subreddit,score,author,created_utc,link_id'
+      });
+      subResults[sub] = res.data || [];
+    }
+
+    // Per-subreddit stats
+    const subStats = Object.entries(subResults).map(([sub, comments]) => {
+      const scores = comments.map(c => c.score || 0);
+      return {
+        sub,
+        count: comments.length,
+        avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        maxComment: comments.reduce((best, c) => (!best || (c.score||0) > (best.score||0)) ? c : best, null),
+        minComment: comments.reduce((worst, c) => (!worst || (c.score||0) < (worst.score||0)) ? c : worst, null)
+      };
+    });
+
+    // Word frequency across all comments
+    const allComments = Object.values(subResults).flat();
+    const wordCounts = {};
+    const playerWords = player.toLowerCase().split(/\s+/);
+    allComments.forEach(c => {
+      const words = (c.body || '').toLowerCase().replace(/[^a-z0-9\s'-]/g, '').split(/\s+/);
+      const seen = new Set();
+      words.forEach(w => {
+        if (w.length > 2 && !STOPWORDS.has(w) && !playerWords.includes(w) && !seen.has(w)) {
+          wordCounts[w] = (wordCounts[w] || 0) + 1;
+          seen.add(w);
+        }
+      });
+    });
+    const topWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 20);
+
+    // Chart
+    let html = '<div class="chart-container"><canvas id="perceptionChart"></canvas></div>';
+
+    // Word cloud
+    html += `<div class="card"><div class="card-title">Top Words Associated with "${escapeHtml(player)}"</div>
+      <div class="word-cloud">${topWords.map(([w, c]) => {
+        const size = 0.7 + (c / (topWords[0]?.[1] || 1)) * 0.8;
+        return `<span class="word-tag" style="font-size:${size}rem">${escapeHtml(w)} (${c})</span>`;
+      }).join('')}</div></div>`;
+
+    // Subreddit breakdowns
+    subStats.forEach(s => {
+      html += `<div class="card"><div class="card-title">r/${escapeHtml(s.sub)} <span class="badge badge-blue">${s.count} comments</span> <span class="badge badge-orange">Avg: ${s.avgScore}</span></div>`;
+      if (s.maxComment) {
+        html += `<div class="comment-card"><div class="comment-body">${escapeHtml(truncate(s.maxComment.body, 300))}</div>
+          <div class="comment-meta"><span>u/${escapeHtml(s.maxComment.author)}</span><span>Score: ${s.maxComment.score}</span><span>${formatDate(s.maxComment.created_utc)}</span>
+          <a href="${commentPermalink(s.maxComment)}" target="_blank">View</a></div></div>`;
+      }
+      if (s.minComment && s.minComment !== s.maxComment) {
+        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body">${escapeHtml(truncate(s.minComment.body, 300))}</div>
+          <div class="comment-meta"><span>u/${escapeHtml(s.minComment.author)}</span><span>Score: ${s.minComment.score}</span><span>${formatDate(s.minComment.created_utc)}</span>
+          <a href="${commentPermalink(s.minComment)}" target="_blank">View</a></div></div>`;
+      }
+      html += '</div>';
+    });
+
+    resultsEl.innerHTML = html;
+
+    // Render chart
+    getOrCreateChart('perceptionChart', {
+      type: 'bar',
+      data: {
+        labels: subStats.map(s => 'r/' + s.sub),
+        datasets: [{
+          label: 'Average Comment Score',
+          data: subStats.map(s => s.avgScore),
+          backgroundColor: CHART_COLORS.slice(0, subStats.length)
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { title: { display: true, text: `"${player}" Perception by Subreddit`, color: '#e8eaf0' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+  } catch (err) {
+    showError(resultsEl, 'Error analyzing perception: ' + err.message);
+  }
+}
+
+// =============================================================================
+// TAB 5: SOCIAL MEDIA CONTENT SOURCING
+// =============================================================================
+let socialData = [];
+
+async function findViralTakes() {
+  const query = document.getElementById('socialQuery').value.trim();
+  if (!query) { toast('Please enter a search keyword.'); return; }
+  const minScore = parseInt(document.getElementById('socialMinScore').value) || 100;
+  const after = document.getElementById('socialAfter').value;
+  const before = document.getElementById('socialBefore').value;
+  const resultsEl = document.getElementById('socialResults');
+  showLoading(resultsEl);
+
+  try {
+    const res = await api('/comments/search', {
+      subreddit: 'nba', body: query, after, before, limit: 100, sort: 'desc',
+      fields: 'id,body,subreddit,score,author,created_utc,link_id'
+    });
+    socialData = (res.data || []).filter(c => (c.score || 0) >= minScore)
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    if (!socialData.length) {
+      showEmpty(resultsEl, `No comments found with score >= ${minScore}. Try lowering the threshold.`);
+      return;
+    }
+
+    resultsEl.innerHTML = `<p style="color:var(--text-secondary);margin-bottom:12px">${socialData.length} viral takes found (score >= ${minScore})</p>` +
+      socialData.map((c, i) => {
+        const bodyShort = truncate(c.body, 280);
+        const bodyFull = c.body || '';
+        return `<div class="comment-card">
+          <div class="comment-body" id="social-body-${i}">${escapeHtml(bodyShort)}</div>
+          ${bodyFull.length > 280 ? `<a href="#" onclick="document.getElementById('social-full-${i}').style.display='block';this.style.display='none';return false" style="font-size:0.8rem">Show full comment</a><div id="social-full-${i}" style="display:none" class="comment-body">${escapeHtml(bodyFull)}</div>` : ''}
+          <div class="comment-meta">
+            <span>u/${escapeHtml(c.author)}</span>
+            <span>Score: ${(c.score||0).toLocaleString()}</span>
+            <span>r/${escapeHtml(c.subreddit)}</span>
+            <span>${formatDate(c.created_utc)}</span>
+            <a href="${commentPermalink(c)}" target="_blank">View</a>
+          </div>
+          <div class="comment-actions">
+            <button class="btn btn-sm btn-secondary" onclick="copySocialComment(${i})">Copy for Twitter</button>
+            <button class="btn btn-sm btn-secondary" onclick="copySocialComment(${i})">Copy for Bluesky</button>
+          </div>
+        </div>`;
+      }).join('');
+
+  } catch (err) {
+    showError(resultsEl, 'Error finding viral takes: ' + err.message);
+  }
+}
+
+function copySocialComment(index) {
+  const c = socialData[index];
+  if (!c) return;
+  const text = `"${truncate(c.body || '', 250).replace(/\n/g, ' ')}" — u/${c.author} on r/${c.subreddit}`;
+  copyToClipboard(text);
+}
+
+function batchExportSocial(count) {
+  if (!socialData.length) { toast('No data to export. Run a search first.'); return; }
+  const items = socialData.slice(0, count);
+  const content = items.map((c, i) =>
+    `--- ${i + 1}. Score: ${c.score} | u/${c.author} on r/${c.subreddit} | ${formatDate(c.created_utc)} ---\n\n"${(c.body || '').trim()}"\n\nPermalink: ${commentPermalink(c)}\n`
+  ).join('\n');
+  downloadFile(content, `viral_takes_top${count}.txt`, 'text/plain');
+  toast(`Exported top ${Math.min(count, items.length)} takes!`);
+}
+
+// =============================================================================
+// TAB 6: SUBREDDIT GROWTH & TEAM POPULARITY
+// =============================================================================
+let growthResults = null;
+
+async function loadGrowthData() {
+  const resultsEl = document.getElementById('growthResults');
+  const progressEl = document.getElementById('growthProgress');
+  const fillEl = document.getElementById('growthProgressFill');
+  progressEl.style.display = 'block';
+  showLoading(resultsEl);
+
+  // Check localStorage cache
+  const cachedGrowth = Cache.get('growth_all_teams');
+  if (cachedGrowth) {
+    growthResults = cachedGrowth;
+    progressEl.style.display = 'none';
+    renderGrowthData();
+    toast('Loaded from cache!');
+    return;
+  }
+
+  const teams = Object.entries(NBA_TEAMS);
+  const results = [];
+  let completed = 0;
+
+  try {
+    for (const [team, sub] of teams) {
+      try {
+        const [recent, previous] = await Promise.all([
+          api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(90) }),
+          api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(180), before: daysAgo(90) })
+        ]);
+        const recentComments = await api('/comments/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(90) });
+
+        const recentPosts = (recent.data || []).reduce((s, d) => s + parseInt(d.count || 0), 0);
+        const prevPosts = (previous.data || []).reduce((s, d) => s + parseInt(d.count || 0), 0);
+        const recentCommentCount = (recentComments.data || []).reduce((s, d) => s + parseInt(d.count || 0), 0);
+        const growth = prevPosts > 0 ? Math.round(((recentPosts - prevPosts) / prevPosts) * 100) : 0;
+
+        results.push({
+          team, sub,
+          recentPosts,
+          recentComments: recentCommentCount,
+          totalActivity: recentPosts + recentCommentCount,
+          growth,
+          avgPostScore: recentPosts > 0 ? Math.round(recentPosts / Math.max((recent.data||[]).length, 1)) : 0
+        });
+      } catch {
+        results.push({ team, sub, recentPosts: 0, recentComments: 0, totalActivity: 0, growth: 0, avgPostScore: 0 });
+      }
+      completed++;
+      fillEl.style.width = `${(completed / teams.length) * 100}%`;
+      resultsEl.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> Loading ${completed}/${teams.length} teams...</div>`;
+    }
+
+    growthResults = results;
+    Cache.set('growth_all_teams', results);
+    progressEl.style.display = 'none';
+    renderGrowthData();
+  } catch (err) {
+    progressEl.style.display = 'none';
+    showError(resultsEl, 'Error loading growth data: ' + err.message);
+  }
+}
+
+function renderGrowthData() {
+  if (!growthResults) return;
+  const resultsEl = document.getElementById('growthResults');
+  const sorted = [...growthResults].sort((a, b) => b.growth - a.growth);
+  const avgGrowth = sorted.reduce((s, t) => s + t.growth, 0) / sorted.length;
+
+  // Chart
+  document.getElementById('growthChart').style.display = 'block';
+  const top15 = sorted.slice(0, 15);
+  getOrCreateChart('growthChartCanvas', {
+    type: 'bar',
+    data: {
+      labels: top15.map(t => t.team.replace(/.*\s/, '')), // short name
+      datasets: [{
+        label: 'Growth %',
+        data: top15.map(t => t.growth),
+        backgroundColor: top15.map(t => t.growth > avgGrowth ? '#22c55e' : '#f97316')
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'y',
+      plugins: { title: { display: true, text: 'Fastest Growing NBA Fanbases on Reddit (90-day)', color: '#e8eaf0' } },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+
+  // Table
+  resultsEl.innerHTML = `
+    <div class="table-wrap"><table id="growthTable">
+      <thead><tr>
+        <th onclick="sortGrowthTable('team')">Team</th>
+        <th onclick="sortGrowthTable('sub')">Subreddit</th>
+        <th onclick="sortGrowthTable('totalActivity')">Activity (90d)</th>
+        <th onclick="sortGrowthTable('growth')">Growth %</th>
+        <th onclick="sortGrowthTable('recentPosts')">Posts</th>
+        <th onclick="sortGrowthTable('recentComments')">Comments</th>
+      </tr></thead>
+      <tbody>${sorted.map(t => `
+        <tr>
+          <td>${escapeHtml(t.team)}</td>
+          <td><a href="https://reddit.com/r/${t.sub}" target="_blank">r/${t.sub}</a></td>
+          <td>${t.totalActivity.toLocaleString()}</td>
+          <td><span class="badge ${t.growth > avgGrowth ? 'badge-green' : t.growth > 0 ? 'badge-orange' : 'badge-red'}">${t.growth > 0 ? '+' : ''}${t.growth}%</span></td>
+          <td>${t.recentPosts.toLocaleString()}</td>
+          <td>${t.recentComments.toLocaleString()}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+let growthSortField = 'growth';
+let growthSortAsc = false;
+function sortGrowthTable(field) {
+  if (growthSortField === field) growthSortAsc = !growthSortAsc;
+  else { growthSortField = field; growthSortAsc = false; }
+  growthResults.sort((a, b) => {
+    const va = typeof a[field] === 'string' ? a[field].toLowerCase() : a[field];
+    const vb = typeof b[field] === 'string' ? b[field].toLowerCase() : b[field];
+    return growthSortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+  renderGrowthData();
+}
+
+// =============================================================================
+// TAB 7: HISTORICAL REACTIONS
+// =============================================================================
+let historyData = [];
+
+async function searchHistory() {
+  const query = document.getElementById('historyQuery').value.trim();
+  if (!query) { toast('Please enter a search query.'); return; }
+  const after = document.getElementById('historyAfter').value;
+  const before = document.getElementById('historyBefore').value;
+  const resultsEl = document.getElementById('historyResults');
+  document.getElementById('historyBrief').style.display = 'none';
+  showLoading(resultsEl);
+
+  try {
+    const res = await api('/posts/search', {
+      subreddit: 'nba', query, after, before, limit: 100,
+      fields: 'id,title,subreddit,score,num_comments,created_utc,author,selftext'
+    });
+    historyData = (res.data || []).sort((a, b) => ((b.score||0) + (b.num_comments||0)) - ((a.score||0) + (a.num_comments||0)));
+
+    if (!historyData.length) { showEmpty(resultsEl, 'No posts found for that query and date range.'); return; }
+
+    resultsEl.innerHTML = historyData.slice(0, 50).map((p, i) => `
+      <div class="card">
+        <div class="card-title"><a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a></div>
+        <div class="comment-meta">
+          <span>u/${escapeHtml(p.author)}</span>
+          <span>Score: ${(p.score||0).toLocaleString()}</span>
+          <span>${(p.num_comments||0).toLocaleString()} comments</span>
+          <span>${formatDate(p.created_utc)}</span>
+          <span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span>
+        </div>
+        ${p.selftext ? `<div style="margin-top:8px;color:var(--text-secondary);font-size:0.85rem">${escapeHtml(truncate(p.selftext, 200))}</div>` : ''}
+        <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="expandThread('${(p.id||'').replace('t3_','')}', this)">Expand Thread</button>
+        <div id="thread-${(p.id||'').replace('t3_','')}" class="expand-content"></div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    showError(resultsEl, 'Error searching history: ' + err.message);
+  }
+}
+
+function parseTreeComments(data) {
+  // The tree endpoint returns {kind: "t1", data: {...}} objects
+  if (!data || !data.length) return [];
+  return data
+    .filter(item => item.kind === 't1' && item.data)
+    .map(item => item.data);
+}
+
+async function expandThread(postId, btn) {
+  const threadEl = document.getElementById('thread-' + postId);
+  if (threadEl.classList.contains('open')) {
+    threadEl.classList.remove('open');
+    btn.textContent = 'Expand Thread';
+    return;
+  }
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+  try {
+    const res = await api('/comments/tree', { link_id: 't3_' + postId, limit: 20 });
+    const comments = parseTreeComments(res.data);
+    if (!comments.length) {
+      threadEl.innerHTML = '<div class="empty-state">No comments found.</div>';
+    } else {
+      threadEl.innerHTML = comments.slice(0, 15).map(c => `
+        <div class="comment-card">
+          <div class="comment-body">${escapeHtml(truncate(c.body, 300))}</div>
+          <div class="comment-meta">
+            <span>u/${escapeHtml(c.author || '[deleted]')}</span>
+            <span>Score: ${c.score || 0}</span>
+            <span>${formatDate(c.created_utc)}</span>
+          </div>
+        </div>`).join('');
+    }
+    threadEl.classList.add('open');
+    btn.textContent = 'Collapse Thread';
+  } catch (err) {
+    threadEl.innerHTML = `<div class="error-msg">Could not load comments: ${escapeHtml(err.message)}</div>`;
+    threadEl.classList.add('open');
+    btn.textContent = 'Retry';
+  }
+  btn.disabled = false;
+}
+
+async function generateBrief() {
+  if (!historyData.length) { toast('Search for posts first.'); return; }
+  const briefEl = document.getElementById('historyBrief');
+  briefEl.style.display = 'block';
+  briefEl.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Generating article brief...</div>';
+
+  const topPosts = historyData.slice(0, 5);
+  let brief = `# Reddit Reaction Brief: "${document.getElementById('historyQuery').value}"\n`;
+  brief += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+
+  for (let i = 0; i < topPosts.length; i++) {
+    const p = topPosts[i];
+    brief += `## ${i + 1}. ${p.title}\n`;
+    brief += `- Score: ${(p.score||0).toLocaleString()} | Comments: ${(p.num_comments||0).toLocaleString()} | Date: ${formatDate(p.created_utc)}\n`;
+    brief += `- Link: ${postPermalink(p)}\n\n`;
+
+    try {
+      const res = await api('/comments/tree', { link_id: (p.id || '').startsWith('t3_') ? p.id : 't3_' + p.id, limit: 5 });
+      const comments = parseTreeComments(res.data).slice(0, 3);
+      comments.forEach((c, j) => {
+        brief += `> **Top Comment ${j + 1}** (Score: ${c.score || 0}, u/${c.author || 'deleted'}):\n`;
+        brief += `> ${truncate(c.body || '', 200)}\n\n`;
+      });
+    } catch {
+      brief += `> *Could not load comments for this post.*\n\n`;
+    }
+    brief += `---\n\n`;
+  }
+
+  briefEl.innerHTML = `
+    <div class="card">
+      <div class="card-title">Article Brief <button class="btn btn-sm" onclick="copyToClipboard(document.getElementById('briefContent').textContent)">Copy</button></div>
+      <div class="markdown-brief" id="briefContent">${escapeHtml(brief)}</div>
+    </div>`;
+}
+
+// =============================================================================
+// INITIALIZATION
+// =============================================================================
+function init() {
+  // Set default dates
+  const today = new Date().toISOString().split('T')[0];
+  const thirtyAgo = daysAgo(30);
+  const ninetyAgo = daysAgo(90);
+
+  document.getElementById('rumorAfter').value = thirtyAgo;
+  document.getElementById('rumorBefore').value = today;
+  document.getElementById('socialAfter').value = thirtyAgo;
+  document.getElementById('socialBefore').value = today;
+  document.getElementById('sentimentAfter').value = ninetyAgo;
+  document.getElementById('sentimentBefore').value = today;
+  document.getElementById('historyAfter').value = '2020-01-01';
+  document.getElementById('historyBefore').value = today;
+
+  // Populate team dropdowns
+  const teamOptions = Object.entries(NBA_TEAMS).map(([team, sub]) =>
+    `<option value="${sub}">${team}</option>`).join('');
+  document.getElementById('sentimentTeam').innerHTML = teamOptions;
+  document.getElementById('sentimentTeam2').innerHTML = '<option value="">-- None (Single Team) --</option>' + teamOptions;
+
+  // Perception team checkboxes
+  document.getElementById('perceptionTeams').innerHTML = Object.entries(NBA_TEAMS).map(([team, sub]) =>
+    `<label class="team-checkbox"><input type="checkbox" value="${sub}"> ${team}</label>`).join('');
+
+  // Check API status
+  checkApiStatus();
+
+  // Enter key triggers search on focused tab
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+      const panel = e.target.closest('.tab-panel');
+      if (!panel) return;
+      const btn = panel.querySelector('.btn');
+      if (btn) btn.click();
+    }
+  });
+}
+
+async function checkApiStatus() {
+  try {
+    await fetch(API_BASE + '/posts/search?limit=1');
+    document.getElementById('apiDot').className = 'api-dot online';
+    document.getElementById('apiStatusText').textContent = 'API Online';
+  } catch {
+    document.getElementById('apiDot').className = 'api-dot offline';
+    document.getElementById('apiStatusText').textContent = 'API Offline';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
