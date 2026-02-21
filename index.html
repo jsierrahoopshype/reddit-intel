@@ -846,10 +846,6 @@ async function api(endpoint, params = {}) {
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined && v !== null && v !== '') filtered[k] = v;
   });
-  // Always sort newest-first for search endpoints (API only supports time-based sorting)
-  if ((endpoint.includes('/posts/search') || endpoint.includes('/comments/search')) && !filtered.sort) {
-    filtered.sort = 'desc';
-  }
   const qs = new URLSearchParams(filtered).toString();
   const url = `${API_BASE}${endpoint}${qs ? '?' + qs : ''}`;
 
@@ -1105,7 +1101,7 @@ async function searchRumors() {
     const allPosts = [];
     for (const sub of RUMOR_SUBS) {
       const res = await api('/posts/search', {
-        subreddit: sub, query, after, before, limit: 100
+        subreddit: sub, query, after, before, limit: 'auto'
       });
       if (res.data) allPosts.push(...res.data);
     }
@@ -1192,7 +1188,7 @@ async function loadTopComments() {
     let allComments = [];
     for (const sub of subs) {
       try {
-        const res = await apiWithRetry('/comments/search', { subreddit: sub, after, limit: 100 });
+        const res = await apiWithRetry('/comments/search', { subreddit: sub, after, limit: 'auto' });
         if (res.data) allComments.push(...res.data);
       } catch (e) { console.warn(`Top comments failed for r/${sub}:`, e.message); }
     }
@@ -1238,7 +1234,7 @@ async function loadTrends() {
   try {
     const after = hoursAgo(hours);
     const res = await apiWithRetry('/posts/search', {
-      subreddit: 'nba', after, limit: 100
+      subreddit: 'nba', after, limit: 'auto'
     });
     trendData = (res.data || []).sort((a, b) => (b.score || 0) - (a.score || 0));
 
@@ -1266,12 +1262,9 @@ async function loadTrends() {
     });
 
     // Stats
-    const maxScore = trendData.length ? trendData[0].score || 0 : 0;
     document.getElementById('trendStats').innerHTML = `
-      ${maxScore < 50 ? '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#856404"><strong>Note:</strong> Arctic Shift is an archive — scores for very recent posts (&lt;24h) are low because they were captured before votes accumulated. Try "Last 7 Days" for posts with mature scores.</div>' : ''}
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-value">${trendData.length}</div><div class="stat-label">Posts Analyzed</div></div>
-        <div class="stat-card"><div class="stat-value">${maxScore.toLocaleString()}</div><div class="stat-label">Top Score</div></div>
         <div class="stat-card"><div class="stat-value">${Object.keys(trendTopics).filter(t => trendTopics[t].posts.length > 0).length}</div><div class="stat-label">Topics Detected</div></div>
         <div class="stat-card"><div class="stat-value">${trendData.length > 0 ? Math.round(trendData.reduce((s,p) => s + (p.score||0), 0) / trendData.length).toLocaleString() : 0}</div><div class="stat-label">Avg Score</div></div>
       </div>`;
@@ -1583,9 +1576,7 @@ async function analyzePerception() {
       if (pEl) pEl.textContent = `Searching r/${sub}... (${completed+1}/${selectedSubs.length})`;
       if (fEl) fEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
       try {
-        // Cap body searches to 7 days max to avoid timeouts
-        const maxAfter = Math.max(after, hoursAgo(168));
-        const res = await apiWithRetry('/comments/search', { subreddit: sub, query: player, after: maxAfter, limit: 25 });
+        const res = await apiWithRetry('/comments/search', { subreddit: sub, body: player, after, limit: 100 });
         subResults[sub] = res.data || [];
       } catch (e) {
         console.warn(`Skipping r/${sub}: ${e.message}`);
@@ -1747,10 +1738,9 @@ async function findViralTakes() {
   showLoading(resultsEl);
 
   try {
-    // Use query param instead of body to avoid timeouts; cap at 7 days
-    const maxAfter = Math.max(new Date(after).getTime() / 1000, hoursAgo(168));
     const res = await apiWithRetry('/comments/search', {
-      subreddit: 'nba', query, after: maxAfter, limit: 25
+      subreddit: 'nba', body: query, after, before, limit: 100,
+      fields: 'id,body,subreddit,score,author,created_utc,link_id'
     });
     socialData = (res.data || []).filter(c => (c.score || 0) >= minScore)
       .sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -1916,7 +1906,7 @@ async function searchHistory() {
 
   try {
     const res = await api('/posts/search', {
-      subreddit: 'nba', query, after, before, limit: 100
+      subreddit: 'nba', query, after, before, limit: 'auto'
     });
     historyData = (res.data || []).sort((a, b) => ((b.score||0) + (b.num_comments||0)) - ((a.score||0) + (a.num_comments||0)));
 

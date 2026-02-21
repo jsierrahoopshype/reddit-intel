@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(node -e:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial build: Reddit Intel Dashboard\n\nSingle-file NBA Reddit Intelligence Dashboard with 7 tabs:\nRumor Tracker, Trend Detection, Fan Sentiment, Player Perception,\nSocial Content Sourcing, Subreddit Growth, and Historical Reactions.\nUses Arctic Shift API with Chart.js visualizations and dark theme.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
