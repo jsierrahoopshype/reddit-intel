@@ -9,28 +9,28 @@
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg-primary: #0f1523;
-  --bg-secondary: #1a2236;
-  --bg-tertiary: #232d44;
-  --bg-card: #1e2940;
-  --text-primary: #e8eaf0;
-  --text-secondary: #8892a4;
-  --text-muted: #5a6478;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --bg-card: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
   --accent: #f97316;
-  --accent-hover: #fb923c;
-  --accent-dim: #f9731633;
-  --border: #2a3550;
-  --success: #22c55e;
-  --danger: #ef4444;
-  --warning: #eab308;
-  --info: #3b82f6;
+  --accent-hover: #ea580c;
+  --accent-dim: #fff7ed;
+  --border: #dee2e6;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #ca8a04;
+  --info: #2563eb;
   --radius: 8px;
-  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
 }
 html { font-size: 14px; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-primary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
@@ -40,7 +40,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 
 /* ===== HEADER ===== */
 .header {
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
   padding: 12px 24px;
   display: flex;
@@ -49,6 +49,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: var(--shadow);
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .logo { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
@@ -56,8 +57,8 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 .api-status {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.8rem; color: var(--text-secondary);
-  background: var(--bg-tertiary); padding: 4px 10px;
-  border-radius: 20px;
+  background: var(--bg-secondary); padding: 4px 10px;
+  border-radius: 20px; border: 1px solid var(--border);
 }
 .api-dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -69,7 +70,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
 /* ===== TAB NAV ===== */
 .tab-nav {
   display: flex;
-  background: var(--bg-secondary);
+  background: var(--bg-primary);
   border-bottom: 2px solid var(--border);
   overflow-x: auto;
   scrollbar-width: thin;
@@ -82,7 +83,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   transition: all 0.2s;
   margin-bottom: -2px;
 }
-.tab-btn:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+.tab-btn:hover { color: var(--text-primary); background: var(--bg-secondary); }
 .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* ===== MAIN CONTENT ===== */
@@ -96,9 +97,10 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   align-items: flex-end;
   margin-bottom: 20px;
   padding: 16px;
-  background: var(--bg-card);
+  background: var(--bg-primary);
   border-radius: var(--radius);
   border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 .form-group { display: flex; flex-direction: column; gap: 4px; }
 .form-group label {
@@ -106,7 +108,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
 }
 input[type="text"], input[type="date"], input[type="number"], select {
-  background: var(--bg-tertiary);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
   color: var(--text-primary);
   padding: 8px 12px;
@@ -114,7 +116,7 @@ input[type="text"], input[type="date"], input[type="number"], select {
   font-size: 0.9rem;
   min-width: 160px;
 }
-input:focus, select:focus { outline: none; border-color: var(--accent); }
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 .btn {
   background: var(--accent);
   color: #fff; border: none;
@@ -126,8 +128,8 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .btn:hover { background: var(--accent-hover); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
-.btn-secondary { background: var(--bg-tertiary); border: 1px solid var(--border); }
-.btn-secondary:hover { background: var(--border); }
+.btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg-tertiary); }
 .btn-success { background: var(--success); }
 .btn-info { background: var(--info); }
 
@@ -139,7 +141,7 @@ table {
   font-size: 0.85rem;
 }
 th {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   color: var(--text-secondary);
   text-transform: uppercase;
   font-size: 0.75rem;
@@ -149,23 +151,24 @@ th {
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
+  border-bottom: 2px solid var(--border);
 }
 th:hover { color: var(--accent); }
+th .sort-arrow { font-size: 0.65rem; margin-left: 3px; }
 td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
-  max-width: 400px;
 }
-tr:hover { background: var(--bg-tertiary); }
-.sort-arrow { margin-left: 4px; opacity: 0.5; }
+tr:hover { background: var(--bg-secondary); }
 
 /* ===== CARDS ===== */
 .card {
-  background: var(--bg-card);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 16px;
+  box-shadow: var(--shadow);
 }
 .card-title {
   font-size: 1rem; font-weight: 600;
@@ -183,22 +186,25 @@ tr:hover { background: var(--bg-tertiary); }
   margin-bottom: 20px;
 }
 .stat-card {
-  background: var(--bg-tertiary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
   text-align: center;
+  box-shadow: var(--shadow);
 }
 .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
 .stat-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; }
 
 /* ===== CHART ===== */
 .chart-container {
-  background: var(--bg-card);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin: 16px 0;
   position: relative;
+  box-shadow: var(--shadow);
 }
 .chart-container canvas { max-height: 350px; }
 
@@ -236,8 +242,9 @@ tr:hover { background: var(--bg-tertiary); }
   color: var(--text-muted);
 }
 .error-msg {
-  background: var(--danger);
-  color: #fff;
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
   padding: 10px 16px;
   border-radius: var(--radius);
   margin: 10px 0;
@@ -245,9 +252,10 @@ tr:hover { background: var(--bg-tertiary); }
 }
 .toast {
   position: fixed; bottom: 20px; right: 20px;
-  background: var(--bg-tertiary); color: var(--text-primary);
+  background: var(--bg-primary); color: var(--text-primary);
   padding: 10px 20px; border-radius: var(--radius);
   border: 1px solid var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 1000; font-size: 0.85rem;
   animation: fadeInUp 0.3s;
 }
@@ -258,7 +266,7 @@ tr:hover { background: var(--bg-tertiary); }
 
 /* ===== COMMENT CARD ===== */
 .comment-card {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-left: 3px solid var(--accent);
   padding: 12px 16px;
   margin: 8px 0;
@@ -283,9 +291,9 @@ tr:hover { background: var(--bg-tertiary); }
   text-transform: uppercase;
 }
 .badge-orange { background: var(--accent-dim); color: var(--accent); }
-.badge-green { background: #22c55e33; color: var(--success); }
-.badge-blue { background: #3b82f633; color: var(--info); }
-.badge-red { background: #ef444433; color: var(--danger); }
+.badge-green { background: #dcfce7; color: var(--success); }
+.badge-blue { background: #dbeafe; color: var(--info); }
+.badge-red { background: #fef2f2; color: var(--danger); }
 
 /* ===== WORD CLOUD ===== */
 .word-cloud {
@@ -293,7 +301,7 @@ tr:hover { background: var(--bg-tertiary); }
   padding: 16px; justify-content: center;
 }
 .word-tag {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   padding: 4px 10px;
   border-radius: 14px;
   font-size: 0.8rem;
@@ -308,8 +316,9 @@ tr:hover { background: var(--bg-tertiary); }
   max-height: 200px;
   overflow-y: auto;
   padding: 8px;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   border-radius: var(--radius);
+  border: 1px solid var(--border);
 }
 .team-checkbox { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; cursor: pointer; }
 .team-checkbox input { accent-color: var(--accent); }
@@ -341,7 +350,7 @@ tr:hover { background: var(--bg-tertiary); }
 
 /* ===== MARKDOWN BRIEF ===== */
 .markdown-brief {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   padding: 16px;
   border-radius: var(--radius);
   white-space: pre-wrap;
@@ -406,19 +415,12 @@ tr:hover { background: var(--bg-tertiary); }
       <label>To</label>
       <input type="date" id="rumorBefore">
     </div>
-    <div class="form-group">
-      <label>Sort By</label>
-      <select id="rumorSort">
-        <option value="date">Date</option>
-        <option value="score">Score</option>
-        <option value="comments">Comments</option>
-      </select>
-    </div>
     <button class="btn" onclick="searchRumors()">Search</button>
     <button class="btn btn-secondary" onclick="exportRumorCSV()">Export CSV</button>
   </div>
   <div id="rumorChart" class="chart-container" style="display:none"><canvas id="rumorChartCanvas"></canvas></div>
-  <div id="rumorResults"><div class="empty-state">Enter a keyword and click Search to find NBA rumors and buzz.</div></div>
+  <div id="rumorStats"></div>
+  <div id="rumorTableWrap"><div class="empty-state">Enter a keyword and click Search to find NBA rumors and buzz.</div></div>
 </div>
 
 <!-- TAB 2: TREND DETECTION -->
@@ -427,6 +429,7 @@ tr:hover { background: var(--bg-tertiary); }
     <div class="form-group">
       <label>Time Period</label>
       <select id="trendPeriod">
+        <option value="1">Last 24 Hours</option>
         <option value="7">Last 7 Days</option>
         <option value="30" selected>Last 30 Days</option>
         <option value="90">Last 90 Days</option>
@@ -671,12 +674,12 @@ const Cache = {
   set(key, data) {
     try {
       localStorage.setItem('rhi_' + key, JSON.stringify({ data, ts: Date.now() }));
-    } catch { /* storage full, ignore */ }
+    } catch { /* storage full */ }
   }
 };
 
 // =============================================================================
-// UTILITIES: API Client
+// UTILITIES: API Client (with console debug logging)
 // =============================================================================
 async function api(endpoint, params = {}) {
   const filtered = {};
@@ -685,15 +688,26 @@ async function api(endpoint, params = {}) {
   });
   const qs = new URLSearchParams(filtered).toString();
   const url = `${API_BASE}${endpoint}${qs ? '?' + qs : ''}`;
-  const cacheKey = url;
-  const cached = Cache.get(cacheKey);
-  if (cached) return cached;
+
+  // Debug: log every API call
+  console.log('[API]', url);
+
+  const cached = Cache.get(url);
+  if (cached) { console.log('[API] Cache hit'); return cached; }
 
   await RateLimiter();
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`API error ${res.status}: ${res.statusText}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    console.error('[API] Error', res.status, body);
+    throw new Error(`API error ${res.status}: ${body || res.statusText}`);
+  }
   const json = await res.json();
-  Cache.set(cacheKey, json);
+  if (json.error) {
+    console.error('[API] Response error:', json.error);
+    throw new Error(`API: ${json.error}`);
+  }
+  Cache.set(url, json);
   return json;
 }
 
@@ -774,9 +788,9 @@ function downloadFile(content, filename, type = 'text/csv') {
   URL.revokeObjectURL(url);
 }
 
-// Chart.js defaults
-Chart.defaults.color = '#8892a4';
-Chart.defaults.borderColor = '#2a3550';
+// Chart.js defaults for light theme
+Chart.defaults.color = '#6c757d';
+Chart.defaults.borderColor = '#dee2e6';
 Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
 
 const charts = {};
@@ -787,7 +801,43 @@ function getOrCreateChart(canvasId, config) {
   return charts[canvasId];
 }
 
-const CHART_COLORS = ['#f97316','#3b82f6','#22c55e','#eab308','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+const CHART_COLORS = ['#f97316','#2563eb','#16a34a','#ca8a04','#dc2626','#7c3aed','#db2777','#0891b2'];
+
+// =============================================================================
+// GENERIC SORTABLE TABLE
+// =============================================================================
+function renderSortableTable(containerId, data, columns, state) {
+  if (!state._sort) { state._sort = columns.find(c => c.defaultSort)?.field || columns[0].field; state._asc = false; }
+  const sorted = [...data].sort((a, b) => {
+    let va = a[state._sort], vb = b[state._sort];
+    if (va == null) va = typeof vb === 'number' ? 0 : '';
+    if (vb == null) vb = typeof va === 'number' ? 0 : '';
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb+'').toLowerCase(); }
+    if (va < vb) return state._asc ? -1 : 1;
+    if (va > vb) return state._asc ? 1 : -1;
+    return 0;
+  });
+
+  const el = document.getElementById(containerId);
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>${columns.map(col => {
+      const arrow = state._sort === col.field ? (state._asc ? ' <span class="sort-arrow">▲</span>' : ' <span class="sort-arrow">▼</span>') : '';
+      return `<th data-sort="${col.field}">${col.label}${arrow}</th>`;
+    }).join('')}</tr></thead>
+    <tbody>${sorted.map(row => `<tr>${columns.map(col =>
+      `<td>${col.render ? col.render(row) : escapeHtml(String(row[col.field] ?? ''))}</td>`
+    ).join('')}</tr>`).join('')}</tbody>
+  </table></div>`;
+
+  el.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const f = th.dataset.sort;
+      if (state._sort === f) state._asc = !state._asc;
+      else { state._sort = f; state._asc = false; }
+      renderSortableTable(containerId, data, columns, state);
+    });
+  });
+}
 
 // =============================================================================
 // TAB NAVIGATION
@@ -805,15 +855,25 @@ document.getElementById('tabNav').addEventListener('click', e => {
 // TAB 1: RUMOR & BUZZ TRACKER
 // =============================================================================
 let rumorData = [];
+const rumorSortState = {};
 const RUMOR_SUBS = ['nba', 'nbadiscussion', 'NBA_TradeDiscussions'];
+
+const RUMOR_COLUMNS = [
+  { field: 'title', label: 'Title', render: p => `<a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a>` },
+  { field: 'subreddit', label: 'Subreddit', render: p => `<span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span>` },
+  { field: 'score', label: 'Score', defaultSort: true, render: p => (p.score||0).toLocaleString() },
+  { field: 'num_comments', label: 'Comments', render: p => (p.num_comments||0).toLocaleString() },
+  { field: 'created_utc', label: 'Date', render: p => formatDate(p.created_utc) }
+];
 
 async function searchRumors() {
   const query = document.getElementById('rumorQuery').value.trim();
   if (!query) { toast('Please enter a search keyword.'); return; }
   const after = document.getElementById('rumorAfter').value;
   const before = document.getElementById('rumorBefore').value;
-  const resultsEl = document.getElementById('rumorResults');
-  showLoading(resultsEl);
+  const statsEl = document.getElementById('rumorStats');
+  const tableEl = document.getElementById('rumorTableWrap');
+  showLoading(tableEl);
 
   try {
     const allPosts = [];
@@ -825,7 +885,17 @@ async function searchRumors() {
       if (res.data) allPosts.push(...res.data);
     }
     rumorData = allPosts;
-    sortAndRenderRumors();
+
+    if (!rumorData.length) { showEmpty(tableEl, 'No results found.'); statsEl.innerHTML = ''; return; }
+
+    statsEl.innerHTML = `<div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">${rumorData.length}</div><div class="stat-label">Posts Found</div></div>
+      <div class="stat-card"><div class="stat-value">${rumorData.reduce((s,p) => s + (p.score||0), 0).toLocaleString()}</div><div class="stat-label">Total Score</div></div>
+      <div class="stat-card"><div class="stat-value">${rumorData.reduce((s,p) => s + (p.num_comments||0), 0).toLocaleString()}</div><div class="stat-label">Total Comments</div></div>
+    </div>`;
+
+    rumorSortState._sort = null; // reset
+    renderSortableTable('rumorTableWrap', rumorData, RUMOR_COLUMNS, rumorSortState);
 
     // Time series chart
     try {
@@ -852,45 +922,10 @@ async function searchRumors() {
           options: { responsive: true, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }
         });
       }
-    } catch {}
+    } catch (e) { console.warn('Chart aggregate failed:', e); }
   } catch (err) {
-    showError(resultsEl, 'Error fetching rumors: ' + err.message);
+    showError(tableEl, 'Error fetching rumors: ' + err.message);
   }
-}
-
-function sortAndRenderRumors() {
-  const sortBy = document.getElementById('rumorSort').value;
-  const sorted = [...rumorData];
-  if (sortBy === 'score') sorted.sort((a, b) => (b.score || 0) - (a.score || 0));
-  else if (sortBy === 'comments') sorted.sort((a, b) => (b.num_comments || 0) - (a.num_comments || 0));
-  else sorted.sort((a, b) => (b.created_utc || 0) - (a.created_utc || 0));
-  renderRumorTable(sorted);
-}
-
-document.getElementById('rumorSort').addEventListener('change', sortAndRenderRumors);
-
-function renderRumorTable(posts) {
-  const el = document.getElementById('rumorResults');
-  if (!posts.length) { showEmpty(el, 'No results found.'); return; }
-  el.innerHTML = `
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-value">${posts.length}</div><div class="stat-label">Posts Found</div></div>
-      <div class="stat-card"><div class="stat-value">${posts.reduce((s,p) => s + (p.score||0), 0).toLocaleString()}</div><div class="stat-label">Total Score</div></div>
-      <div class="stat-card"><div class="stat-value">${posts.reduce((s,p) => s + (p.num_comments||0), 0).toLocaleString()}</div><div class="stat-label">Total Comments</div></div>
-    </div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Title</th><th>Subreddit</th><th>Score</th><th>Comments</th><th>Date</th><th>Link</th></tr></thead>
-      <tbody>${posts.map(p => `
-        <tr>
-          <td>${escapeHtml(truncate(p.title, 80))}</td>
-          <td><span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span></td>
-          <td>${(p.score||0).toLocaleString()}</td>
-          <td>${(p.num_comments||0).toLocaleString()}</td>
-          <td>${formatDate(p.created_utc)}</td>
-          <td><a href="${postPermalink(p)}" target="_blank">View</a></td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>`;
 }
 
 function exportRumorCSV() {
@@ -907,6 +942,7 @@ function exportRumorCSV() {
 // TAB 2: TREND DETECTION & CONTENT IDEAS
 // =============================================================================
 let trendData = [];
+let trendTopics = {};
 
 async function loadTrends() {
   const days = parseInt(document.getElementById('trendPeriod').value);
@@ -922,25 +958,25 @@ async function loadTrends() {
     trendData = (res.data || []).sort((a, b) => (b.score || 0) - (a.score || 0));
 
     // Categorize posts
-    const topics = {};
-    Object.keys(TOPIC_KEYWORDS).forEach(t => { topics[t] = { posts: [], totalScore: 0, totalComments: 0 }; });
-    topics['other'] = { posts: [], totalScore: 0, totalComments: 0 };
+    trendTopics = {};
+    Object.keys(TOPIC_KEYWORDS).forEach(t => { trendTopics[t] = { posts: [], totalScore: 0, totalComments: 0 }; });
+    trendTopics['other'] = { posts: [], totalScore: 0, totalComments: 0 };
 
     trendData.forEach(post => {
       const titleLower = (post.title || '').toLowerCase();
       let matched = false;
       Object.entries(TOPIC_KEYWORDS).forEach(([topic, keywords]) => {
         if (keywords.some(kw => titleLower.includes(kw))) {
-          topics[topic].posts.push(post);
-          topics[topic].totalScore += (post.score || 0);
-          topics[topic].totalComments += (post.num_comments || 0);
+          trendTopics[topic].posts.push(post);
+          trendTopics[topic].totalScore += (post.score || 0);
+          trendTopics[topic].totalComments += (post.num_comments || 0);
           matched = true;
         }
       });
       if (!matched) {
-        topics['other'].posts.push(post);
-        topics['other'].totalScore += (post.score || 0);
-        topics['other'].totalComments += (post.num_comments || 0);
+        trendTopics['other'].posts.push(post);
+        trendTopics['other'].totalScore += (post.score || 0);
+        trendTopics['other'].totalComments += (post.num_comments || 0);
       }
     });
 
@@ -948,13 +984,13 @@ async function loadTrends() {
     document.getElementById('trendStats').innerHTML = `
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-value">${trendData.length}</div><div class="stat-label">Posts Analyzed</div></div>
-        <div class="stat-card"><div class="stat-value">${Object.keys(topics).filter(t => topics[t].posts.length > 0).length}</div><div class="stat-label">Topics Detected</div></div>
+        <div class="stat-card"><div class="stat-value">${Object.keys(trendTopics).filter(t => trendTopics[t].posts.length > 0).length}</div><div class="stat-label">Topics Detected</div></div>
         <div class="stat-card"><div class="stat-value">${trendData.length > 0 ? Math.round(trendData.reduce((s,p) => s + (p.score||0), 0) / trendData.length).toLocaleString() : 0}</div><div class="stat-label">Avg Score</div></div>
       </div>`;
 
     // Bar chart
-    const topicNames = Object.keys(topics).filter(t => t !== 'other' && topics[t].posts.length > 0);
-    const engagement = topicNames.map(t => topics[t].totalScore + topics[t].totalComments);
+    const topicNames = Object.keys(trendTopics).filter(t => t !== 'other' && trendTopics[t].posts.length > 0);
+    const engagement = topicNames.map(t => trendTopics[t].totalScore + trendTopics[t].totalComments);
     document.getElementById('trendChart').style.display = 'block';
     getOrCreateChart('trendChartCanvas', {
       type: 'bar',
@@ -966,56 +1002,102 @@ async function loadTrends() {
           backgroundColor: CHART_COLORS.slice(0, topicNames.length)
         }]
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
     // Underserved topics
     const underserved = topicNames
-      .filter(t => topics[t].posts.length > 0)
-      .map(t => ({
-        topic: t,
-        count: topics[t].posts.length,
-        avgScore: Math.round(topics[t].totalScore / topics[t].posts.length),
-        totalEngagement: topics[t].totalScore + topics[t].totalComments
-      }))
+      .filter(t => trendTopics[t].posts.length > 0)
+      .map(t => ({ topic: t, count: trendTopics[t].posts.length, avgScore: Math.round(trendTopics[t].totalScore / trendTopics[t].posts.length), totalEngagement: trendTopics[t].totalScore + trendTopics[t].totalComments }))
       .sort((a, b) => b.avgScore - a.avgScore);
-
-    const avgAvgScore = underserved.reduce((s, u) => s + u.avgScore, 0) / underserved.length;
-    const highPerformers = underserved.filter(u => u.avgScore > avgAvgScore && u.count < trendData.length / Object.keys(topics).length);
-
+    const avgAvgScore = underserved.reduce((s, u) => s + u.avgScore, 0) / (underserved.length || 1);
+    const highPerformers = underserved.filter(u => u.avgScore > avgAvgScore && u.count < trendData.length / Object.keys(trendTopics).length);
     const underEl = document.getElementById('trendUnderserved');
     if (highPerformers.length > 0) {
       underEl.style.display = 'block';
       underEl.innerHTML = `<div class="card"><div class="card-title">Underserved Topics (High Avg Score, Low Post Count)</div>
         <div class="table-wrap"><table><thead><tr><th>Topic</th><th>Post Count</th><th>Avg Score</th><th>Total Engagement</th></tr></thead>
         <tbody>${highPerformers.map(u => `<tr><td><span class="badge badge-green">${u.topic}</span></td><td>${u.count}</td><td>${u.avgScore.toLocaleString()}</td><td>${u.totalEngagement.toLocaleString()}</td></tr>`).join('')}</tbody></table></div></div>`;
-    } else {
-      underEl.style.display = 'none';
-    }
+    } else { underEl.style.display = 'none'; }
 
     // Results grouped by topic
     let html = '';
-    topicNames.sort((a, b) => (topics[b].totalScore + topics[b].totalComments) - (topics[a].totalScore + topics[a].totalComments));
-    topicNames.forEach(topic => {
-      const tp = topics[topic];
+    topicNames.sort((a, b) => (trendTopics[b].totalScore + trendTopics[b].totalComments) - (trendTopics[a].totalScore + trendTopics[a].totalComments));
+    topicNames.forEach((topic, idx) => {
+      const tp = trendTopics[topic];
       const topPosts = tp.posts.slice(0, 10);
+      const tableId = `trendTable_${idx}`;
       html += `<div class="card"><div class="card-title">${topic.charAt(0).toUpperCase() + topic.slice(1)} <span class="badge badge-blue">${tp.posts.length} posts</span></div>
-        <div class="table-wrap"><table><thead><tr><th>Title</th><th>Score</th><th>Comments</th><th>Date</th><th>Link</th></tr></thead>
-        <tbody>${topPosts.map(p => `<tr><td>${escapeHtml(truncate(p.title, 70))}</td><td>${(p.score||0).toLocaleString()}</td><td>${(p.num_comments||0).toLocaleString()}</td><td>${formatDate(p.created_utc)}</td><td><a href="${postPermalink(p)}" target="_blank">View</a></td></tr>`).join('')}</tbody></table></div></div>`;
+        <div id="${tableId}"></div>
+        <div id="trendComments_${idx}"><button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="loadTrendComments('${topic}', ${idx})">Load Top & Bottom Comments</button></div>
+      </div>`;
     });
     resultsEl.innerHTML = html || '<div class="empty-state">No categorized posts found.</div>';
+
+    // Render sortable tables for each topic
+    topicNames.forEach((topic, idx) => {
+      const tp = trendTopics[topic];
+      const tableId = `trendTable_${idx}`;
+      const state = {};
+      renderSortableTable(tableId, tp.posts.slice(0, 10), [
+        { field: 'title', label: 'Title', render: p => `<a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a>` },
+        { field: 'score', label: 'Score', defaultSort: true, render: p => (p.score||0).toLocaleString() },
+        { field: 'num_comments', label: 'Comments', render: p => (p.num_comments||0).toLocaleString() },
+        { field: 'created_utc', label: 'Date', render: p => formatDate(p.created_utc) }
+      ], state);
+    });
 
   } catch (err) {
     showError(resultsEl, 'Error loading trends: ' + err.message);
   }
 }
 
+async function loadTrendComments(topic, idx) {
+  const el = document.getElementById(`trendComments_${idx}`);
+  el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading comments...</div>';
+  const tp = trendTopics[topic];
+  if (!tp || !tp.posts.length) { el.innerHTML = '<div class="empty-state">No posts to load comments from.</div>'; return; }
+
+  try {
+    const topPostIds = tp.posts.slice(0, 3).map(p => (p.id || '').replace('t3_', ''));
+    let allComments = [];
+    for (const pid of topPostIds) {
+      try {
+        const res = await api('/comments/tree', { link_id: 't3_' + pid, limit: 10 });
+        const comments = parseTreeComments(res.data);
+        allComments.push(...comments);
+      } catch {}
+    }
+
+    if (!allComments.length) { el.innerHTML = '<div class="empty-state">No comments found.</div>'; return; }
+
+    allComments.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const top3 = allComments.slice(0, 3);
+    const bottom3 = allComments.filter(c => (c.score || 0) < 1).sort((a, b) => (a.score || 0) - (b.score || 0)).slice(0, 3);
+
+    let html = '<div style="margin-top:12px"><strong style="color:var(--success)">Most Upvoted Comments:</strong>';
+    top3.forEach(c => {
+      html += `<div class="comment-card"><div class="comment-body">${escapeHtml(truncate(c.body, 300))}</div>
+        <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${c.score || 0}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
+    });
+
+    if (bottom3.length > 0) {
+      html += '<strong style="color:var(--danger)">Most Downvoted Comments:</strong>';
+      bottom3.forEach(c => {
+        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body">${escapeHtml(truncate(c.body, 300))}</div>
+          <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${c.score || 0}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
+      });
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  } catch (err) {
+    el.innerHTML = `<div class="error-msg">Error loading comments: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
 // =============================================================================
 // TAB 3: FAN SENTIMENT TIME SERIES
+// Uses time_series endpoint (NOT comments/search/aggregate which times out)
 // =============================================================================
 async function loadSentiment() {
   const team1Sub = document.getElementById('sentimentTeam').value;
@@ -1031,12 +1113,17 @@ async function loadSentiment() {
     const team1Name = SUB_TO_TEAM[team1Sub.toLowerCase()] || team1Sub;
 
     async function fetchTeamData(sub) {
+      // Use time_series for all three metrics (reliable, no 422 timeouts)
       const [posts, comments, scores] = await Promise.all([
-        api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: precision, after, before }),
-        api('/comments/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: precision, after, before }),
+        api('/time_series', { key: `r/${sub}/posts/count`, precision, after, before }),
+        api('/time_series', { key: `r/${sub}/comments/count`, precision, after, before }),
         api('/time_series', { key: `r/${sub}/posts/sum_score`, precision, after, before })
       ]);
-      return { posts: posts.data || [], comments: comments.data || [], scores: scores.data || [] };
+      return {
+        posts: (posts.data || []).map(d => ({ date: d.date, value: d.value })),
+        comments: (comments.data || []).map(d => ({ date: d.date, value: d.value })),
+        scores: (scores.data || []).map(d => ({ date: d.date, value: d.value }))
+      };
     }
 
     const data1 = await fetchTeamData(team1Sub);
@@ -1049,9 +1136,9 @@ async function loadSentiment() {
 
     if (!team2Sub) {
       // Single team view
-      const labels = data1.posts.map(d => formatDate(d.created_utc));
-      const postCounts = data1.posts.map(d => parseInt(d.count));
-      const commentCounts = data1.comments.map(d => parseInt(d.count));
+      const labels = data1.posts.map(d => formatDate(d.date));
+      const postCounts = data1.posts.map(d => d.value || 0);
+      const commentCounts = data1.comments.map(d => d.value || 0);
       const scoreValues = data1.scores.map(d => d.value || 0);
 
       chartsEl.innerHTML = '<div class="chart-container"><canvas id="sentimentMainChart"></canvas></div>';
@@ -1061,16 +1148,14 @@ async function loadSentiment() {
           labels,
           datasets: [
             { label: 'Posts', data: postCounts, borderColor: '#f97316', backgroundColor: '#f9731622', fill: true, tension: 0.3, pointRadius: 2, yAxisID: 'y' },
-            { label: 'Comments', data: commentCounts, borderColor: '#3b82f6', backgroundColor: '#3b82f622', fill: true, tension: 0.3, pointRadius: 2, yAxisID: 'y' },
-            { label: 'Total Score', data: scoreValues, borderColor: '#22c55e', backgroundColor: '#22c55e22', fill: false, tension: 0.3, pointRadius: 2, yAxisID: 'y1' }
+            { label: 'Comments', data: commentCounts, borderColor: '#2563eb', backgroundColor: '#2563eb22', fill: true, tension: 0.3, pointRadius: 2, yAxisID: 'y' },
+            { label: 'Total Score', data: scoreValues, borderColor: '#16a34a', backgroundColor: '#16a34a22', fill: false, tension: 0.3, pointRadius: 2, yAxisID: 'y1' }
           ]
         },
         options: {
           responsive: true,
           interaction: { mode: 'index', intersect: false },
-          plugins: {
-            title: { display: true, text: `r/${team1Sub} Activity — ${team1Name}`, color: '#e8eaf0' }
-          },
+          plugins: { title: { display: true, text: `r/${team1Sub} Activity — ${team1Name}`, color: '#1a1a2e' } },
           scales: {
             y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: 'Count' } },
             y1: { type: 'linear', position: 'right', beginAtZero: true, title: { display: true, text: 'Score' }, grid: { drawOnChartArea: false } }
@@ -1078,37 +1163,31 @@ async function loadSentiment() {
         }
       });
 
-      // Show event markers as text
+      // NBA events in range
       const eventsInRange = NBA_EVENTS.filter(e => {
-        const ed = new Date(e.date);
-        const ad = after ? new Date(after) : new Date(0);
-        const bd = before ? new Date(before) : new Date();
+        const ed = new Date(e.date), ad = after ? new Date(after) : new Date(0), bd = before ? new Date(before) : new Date();
         return ed >= ad && ed <= bd;
       });
-      let eventHtml = '';
-      if (eventsInRange.length > 0) {
-        eventHtml = '<div class="card"><div class="card-title">NBA Events in Range</div>' +
-          eventsInRange.map(e => `<span class="badge badge-orange" style="margin:4px">${e.label} (${e.date})</span>`).join('') + '</div>';
-      }
-      resultsEl.innerHTML = eventHtml || '';
+      resultsEl.innerHTML = eventsInRange.length > 0
+        ? '<div class="card"><div class="card-title">NBA Events in Range</div>' + eventsInRange.map(e => `<span class="badge badge-orange" style="margin:4px">${e.label} (${e.date})</span>`).join('') + '</div>'
+        : '';
 
     } else {
       // Compare mode
-      const labels1 = data1.posts.map(d => formatDate(d.created_utc));
-      const labels2 = data2.posts.map(d => formatDate(d.created_utc));
+      const labels1 = data1.posts.map(d => formatDate(d.date));
+      const labels2 = data2.posts.map(d => formatDate(d.date));
       const allLabels = [...new Set([...labels1, ...labels2])].sort();
 
-      function alignData(data, labels, allLabels) {
+      function alignData(dataArr, labels, allLabels) {
         const map = {};
-        labels.forEach((l, i) => { map[l] = parseInt(data[i]?.count || 0); });
+        labels.forEach((l, i) => { map[l] = dataArr[i]?.value || 0; });
         return allLabels.map(l => map[l] || 0);
       }
 
-      chartsEl.innerHTML = `
-        <div class="compare-grid">
-          <div class="chart-container"><canvas id="sentCompare1"></canvas></div>
-          <div class="chart-container"><canvas id="sentCompare2"></canvas></div>
-        </div>`;
+      chartsEl.innerHTML = `<div class="compare-grid">
+        <div class="chart-container"><canvas id="sentCompare1"></canvas></div>
+        <div class="chart-container"><canvas id="sentCompare2"></canvas></div>
+      </div>`;
 
       getOrCreateChart('sentCompare1', {
         type: 'line',
@@ -1116,14 +1195,10 @@ async function loadSentiment() {
           labels: allLabels,
           datasets: [
             { label: `r/${team1Sub} Posts`, data: alignData(data1.posts, labels1, allLabels), borderColor: '#f97316', tension: 0.3, pointRadius: 1 },
-            { label: `r/${team2Sub} Posts`, data: alignData(data2.posts, labels2, allLabels), borderColor: '#3b82f6', tension: 0.3, pointRadius: 1 }
+            { label: `r/${team2Sub} Posts`, data: alignData(data2.posts, labels2, allLabels), borderColor: '#2563eb', tension: 0.3, pointRadius: 1 }
           ]
         },
-        options: {
-          responsive: true,
-          plugins: { title: { display: true, text: 'Posts Comparison', color: '#e8eaf0' } },
-          scales: { y: { beginAtZero: true } }
-        }
+        options: { responsive: true, plugins: { title: { display: true, text: 'Posts Comparison', color: '#1a1a2e' } }, scales: { y: { beginAtZero: true } } }
       });
 
       getOrCreateChart('sentCompare2', {
@@ -1132,16 +1207,11 @@ async function loadSentiment() {
           labels: allLabels,
           datasets: [
             { label: `r/${team1Sub} Comments`, data: alignData(data1.comments, labels1, allLabels), borderColor: '#f97316', tension: 0.3, pointRadius: 1 },
-            { label: `r/${team2Sub} Comments`, data: alignData(data2.comments, labels2, allLabels), borderColor: '#3b82f6', tension: 0.3, pointRadius: 1 }
+            { label: `r/${team2Sub} Comments`, data: alignData(data2.comments, labels2, allLabels), borderColor: '#2563eb', tension: 0.3, pointRadius: 1 }
           ]
         },
-        options: {
-          responsive: true,
-          plugins: { title: { display: true, text: 'Comments Comparison', color: '#e8eaf0' } },
-          scales: { y: { beginAtZero: true } }
-        }
+        options: { responsive: true, plugins: { title: { display: true, text: 'Comments Comparison', color: '#1a1a2e' } }, scales: { y: { beginAtZero: true } } }
       });
-
       resultsEl.innerHTML = '';
     }
   } catch (err) {
@@ -1169,7 +1239,7 @@ async function analyzePerception() {
     const subResults = {};
     for (const sub of selectedSubs) {
       const res = await api('/comments/search', {
-        subreddit: sub, body: player, after, limit: 100, sort: 'desc',
+        subreddit: sub, body: player, after, limit: 100,
         fields: 'id,body,subreddit,score,author,created_utc,link_id'
       });
       subResults[sub] = res.data || [];
@@ -1179,15 +1249,14 @@ async function analyzePerception() {
     const subStats = Object.entries(subResults).map(([sub, comments]) => {
       const scores = comments.map(c => c.score || 0);
       return {
-        sub,
-        count: comments.length,
+        sub, count: comments.length,
         avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
         maxComment: comments.reduce((best, c) => (!best || (c.score||0) > (best.score||0)) ? c : best, null),
         minComment: comments.reduce((worst, c) => (!worst || (c.score||0) < (worst.score||0)) ? c : worst, null)
       };
     });
 
-    // Word frequency across all comments
+    // Word frequency
     const allComments = Object.values(subResults).flat();
     const wordCounts = {};
     const playerWords = player.toLowerCase().split(/\s+/);
@@ -1203,17 +1272,13 @@ async function analyzePerception() {
     });
     const topWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 20);
 
-    // Chart
     let html = '<div class="chart-container"><canvas id="perceptionChart"></canvas></div>';
-
-    // Word cloud
     html += `<div class="card"><div class="card-title">Top Words Associated with "${escapeHtml(player)}"</div>
       <div class="word-cloud">${topWords.map(([w, c]) => {
         const size = 0.7 + (c / (topWords[0]?.[1] || 1)) * 0.8;
         return `<span class="word-tag" style="font-size:${size}rem">${escapeHtml(w)} (${c})</span>`;
       }).join('')}</div></div>`;
 
-    // Subreddit breakdowns
     subStats.forEach(s => {
       html += `<div class="card"><div class="card-title">r/${escapeHtml(s.sub)} <span class="badge badge-blue">${s.count} comments</span> <span class="badge badge-orange">Avg: ${s.avgScore}</span></div>`;
       if (s.maxComment) {
@@ -1230,25 +1295,14 @@ async function analyzePerception() {
     });
 
     resultsEl.innerHTML = html;
-
-    // Render chart
     getOrCreateChart('perceptionChart', {
       type: 'bar',
       data: {
         labels: subStats.map(s => 'r/' + s.sub),
-        datasets: [{
-          label: 'Average Comment Score',
-          data: subStats.map(s => s.avgScore),
-          backgroundColor: CHART_COLORS.slice(0, subStats.length)
-        }]
+        datasets: [{ label: 'Average Comment Score', data: subStats.map(s => s.avgScore), backgroundColor: CHART_COLORS.slice(0, subStats.length) }]
       },
-      options: {
-        responsive: true,
-        plugins: { title: { display: true, text: `"${player}" Perception by Subreddit`, color: '#e8eaf0' } },
-        scales: { y: { beginAtZero: true } }
-      }
+      options: { responsive: true, plugins: { title: { display: true, text: `"${player}" Perception by Subreddit`, color: '#1a1a2e' } }, scales: { y: { beginAtZero: true } } }
     });
-
   } catch (err) {
     showError(resultsEl, 'Error analyzing perception: ' + err.message);
   }
@@ -1270,7 +1324,7 @@ async function findViralTakes() {
 
   try {
     const res = await api('/comments/search', {
-      subreddit: 'nba', body: query, after, before, limit: 100, sort: 'desc',
+      subreddit: 'nba', body: query, after, before, limit: 100,
       fields: 'id,body,subreddit,score,author,created_utc,link_id'
     });
     socialData = (res.data || []).filter(c => (c.score || 0) >= minScore)
@@ -1301,7 +1355,6 @@ async function findViralTakes() {
           </div>
         </div>`;
       }).join('');
-
   } catch (err) {
     showError(resultsEl, 'Error finding viral takes: ' + err.message);
   }
@@ -1326,8 +1379,10 @@ function batchExportSocial(count) {
 
 // =============================================================================
 // TAB 6: SUBREDDIT GROWTH & TEAM POPULARITY
+// Uses time_series for comment counts (NOT comments/search/aggregate which 422s)
 // =============================================================================
 let growthResults = null;
+const growthSortState = {};
 
 async function loadGrowthData() {
   const resultsEl = document.getElementById('growthResults');
@@ -1336,7 +1391,6 @@ async function loadGrowthData() {
   progressEl.style.display = 'block';
   showLoading(resultsEl);
 
-  // Check localStorage cache
   const cachedGrowth = Cache.get('growth_all_teams');
   if (cachedGrowth) {
     growthResults = cachedGrowth;
@@ -1353,26 +1407,21 @@ async function loadGrowthData() {
   try {
     for (const [team, sub] of teams) {
       try {
-        const [recent, previous] = await Promise.all([
+        // Use posts aggregate + time_series for comments (avoids 422)
+        const [recent, previous, recentCommentsTs] = await Promise.all([
           api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(90) }),
-          api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(180), before: daysAgo(90) })
+          api('/posts/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(180), before: daysAgo(90) }),
+          api('/time_series', { key: `r/${sub}/comments/count`, precision: 'month', after: daysAgo(90) })
         ]);
-        const recentComments = await api('/comments/search/aggregate', { subreddit: sub, aggregate: 'created_utc', frequency: 'month', after: daysAgo(90) });
 
         const recentPosts = (recent.data || []).reduce((s, d) => s + parseInt(d.count || 0), 0);
         const prevPosts = (previous.data || []).reduce((s, d) => s + parseInt(d.count || 0), 0);
-        const recentCommentCount = (recentComments.data || []).reduce((s, d) => s + parseInt(d.count || 0), 0);
+        const recentCommentCount = (recentCommentsTs.data || []).reduce((s, d) => s + (d.value || 0), 0);
         const growth = prevPosts > 0 ? Math.round(((recentPosts - prevPosts) / prevPosts) * 100) : 0;
 
-        results.push({
-          team, sub,
-          recentPosts,
-          recentComments: recentCommentCount,
-          totalActivity: recentPosts + recentCommentCount,
-          growth,
-          avgPostScore: recentPosts > 0 ? Math.round(recentPosts / Math.max((recent.data||[]).length, 1)) : 0
-        });
-      } catch {
+        results.push({ team, sub, recentPosts, recentComments: recentCommentCount, totalActivity: recentPosts + recentCommentCount, growth, avgPostScore: 0 });
+      } catch (e) {
+        console.warn(`Growth data failed for ${team}:`, e.message);
         results.push({ team, sub, recentPosts: 0, recentComments: 0, totalActivity: 0, growth: 0, avgPostScore: 0 });
       }
       completed++;
@@ -1390,11 +1439,21 @@ async function loadGrowthData() {
   }
 }
 
+const GROWTH_COLUMNS = [
+  { field: 'team', label: 'Team' },
+  { field: 'sub', label: 'Subreddit', render: t => `<a href="https://reddit.com/r/${t.sub}" target="_blank">r/${t.sub}</a>` },
+  { field: 'totalActivity', label: 'Activity (90d)', render: t => t.totalActivity.toLocaleString() },
+  { field: 'growth', label: 'Growth %', defaultSort: true, render: t => {
+    const cls = t.growth > 0 ? 'badge-green' : t.growth < 0 ? 'badge-red' : 'badge-orange';
+    return `<span class="badge ${cls}">${t.growth > 0 ? '+' : ''}${t.growth}%</span>`;
+  }},
+  { field: 'recentPosts', label: 'Posts', render: t => t.recentPosts.toLocaleString() },
+  { field: 'recentComments', label: 'Comments', render: t => t.recentComments.toLocaleString() }
+];
+
 function renderGrowthData() {
   if (!growthResults) return;
-  const resultsEl = document.getElementById('growthResults');
   const sorted = [...growthResults].sort((a, b) => b.growth - a.growth);
-  const avgGrowth = sorted.reduce((s, t) => s + t.growth, 0) / sorted.length;
 
   // Chart
   document.getElementById('growthChart').style.display = 'block';
@@ -1402,56 +1461,22 @@ function renderGrowthData() {
   getOrCreateChart('growthChartCanvas', {
     type: 'bar',
     data: {
-      labels: top15.map(t => t.team.replace(/.*\s/, '')), // short name
+      labels: top15.map(t => t.team.replace(/.*\s/, '')),
       datasets: [{
         label: 'Growth %',
         data: top15.map(t => t.growth),
-        backgroundColor: top15.map(t => t.growth > avgGrowth ? '#22c55e' : '#f97316')
+        backgroundColor: top15.map(t => t.growth > 0 ? '#16a34a' : '#f97316')
       }]
     },
     options: {
-      responsive: true,
-      indexAxis: 'y',
-      plugins: { title: { display: true, text: 'Fastest Growing NBA Fanbases on Reddit (90-day)', color: '#e8eaf0' } },
+      responsive: true, indexAxis: 'y',
+      plugins: { title: { display: true, text: 'Fastest Growing NBA Fanbases on Reddit (90-day)', color: '#1a1a2e' } },
       scales: { x: { beginAtZero: true } }
     }
   });
 
-  // Table
-  resultsEl.innerHTML = `
-    <div class="table-wrap"><table id="growthTable">
-      <thead><tr>
-        <th onclick="sortGrowthTable('team')">Team</th>
-        <th onclick="sortGrowthTable('sub')">Subreddit</th>
-        <th onclick="sortGrowthTable('totalActivity')">Activity (90d)</th>
-        <th onclick="sortGrowthTable('growth')">Growth %</th>
-        <th onclick="sortGrowthTable('recentPosts')">Posts</th>
-        <th onclick="sortGrowthTable('recentComments')">Comments</th>
-      </tr></thead>
-      <tbody>${sorted.map(t => `
-        <tr>
-          <td>${escapeHtml(t.team)}</td>
-          <td><a href="https://reddit.com/r/${t.sub}" target="_blank">r/${t.sub}</a></td>
-          <td>${t.totalActivity.toLocaleString()}</td>
-          <td><span class="badge ${t.growth > avgGrowth ? 'badge-green' : t.growth > 0 ? 'badge-orange' : 'badge-red'}">${t.growth > 0 ? '+' : ''}${t.growth}%</span></td>
-          <td>${t.recentPosts.toLocaleString()}</td>
-          <td>${t.recentComments.toLocaleString()}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>`;
-}
-
-let growthSortField = 'growth';
-let growthSortAsc = false;
-function sortGrowthTable(field) {
-  if (growthSortField === field) growthSortAsc = !growthSortAsc;
-  else { growthSortField = field; growthSortAsc = false; }
-  growthResults.sort((a, b) => {
-    const va = typeof a[field] === 'string' ? a[field].toLowerCase() : a[field];
-    const vb = typeof b[field] === 'string' ? b[field].toLowerCase() : b[field];
-    return growthSortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
-  });
-  renderGrowthData();
+  growthSortState._sort = null;
+  renderSortableTable('growthResults', growthResults, GROWTH_COLUMNS, growthSortState);
 }
 
 // =============================================================================
@@ -1477,7 +1502,7 @@ async function searchHistory() {
 
     if (!historyData.length) { showEmpty(resultsEl, 'No posts found for that query and date range.'); return; }
 
-    resultsEl.innerHTML = historyData.slice(0, 50).map((p, i) => `
+    resultsEl.innerHTML = historyData.slice(0, 50).map(p => `
       <div class="card">
         <div class="card-title"><a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a></div>
         <div class="comment-meta">
@@ -1490,20 +1515,15 @@ async function searchHistory() {
         ${p.selftext ? `<div style="margin-top:8px;color:var(--text-secondary);font-size:0.85rem">${escapeHtml(truncate(p.selftext, 200))}</div>` : ''}
         <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="expandThread('${(p.id||'').replace('t3_','')}', this)">Expand Thread</button>
         <div id="thread-${(p.id||'').replace('t3_','')}" class="expand-content"></div>
-      </div>
-    `).join('');
-
+      </div>`).join('');
   } catch (err) {
     showError(resultsEl, 'Error searching history: ' + err.message);
   }
 }
 
 function parseTreeComments(data) {
-  // The tree endpoint returns {kind: "t1", data: {...}} objects
   if (!data || !data.length) return [];
-  return data
-    .filter(item => item.kind === 't1' && item.data)
-    .map(item => item.data);
+  return data.filter(item => item.kind === 't1' && item.data).map(item => item.data);
 }
 
 async function expandThread(postId, btn) {
@@ -1581,7 +1601,6 @@ async function generateBrief() {
 // INITIALIZATION
 // =============================================================================
 function init() {
-  // Set default dates
   const today = new Date().toISOString().split('T')[0];
   const thirtyAgo = daysAgo(30);
   const ninetyAgo = daysAgo(90);
@@ -1595,20 +1614,15 @@ function init() {
   document.getElementById('historyAfter').value = '2020-01-01';
   document.getElementById('historyBefore').value = today;
 
-  // Populate team dropdowns
   const teamOptions = Object.entries(NBA_TEAMS).map(([team, sub]) =>
     `<option value="${sub}">${team}</option>`).join('');
   document.getElementById('sentimentTeam').innerHTML = teamOptions;
   document.getElementById('sentimentTeam2').innerHTML = '<option value="">-- None (Single Team) --</option>' + teamOptions;
-
-  // Perception team checkboxes
   document.getElementById('perceptionTeams').innerHTML = Object.entries(NBA_TEAMS).map(([team, sub]) =>
     `<label class="team-checkbox"><input type="checkbox" value="${sub}"> ${team}</label>`).join('');
 
-  // Check API status
   checkApiStatus();
 
-  // Enter key triggers search on focused tab
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
       const panel = e.target.closest('.tab-panel');
