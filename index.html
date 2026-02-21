@@ -172,7 +172,7 @@ tr:hover { background: var(--bg-secondary); }
 }
 .card-title {
   font-size: 1rem; font-weight: 600;
-  margin-bottom: 8px; color: var(--accent);
+  margin-bottom: 8px; color: #333;
 }
 .card-grid {
   display: grid;
@@ -193,7 +193,7 @@ tr:hover { background: var(--bg-secondary); }
   text-align: center;
   box-shadow: var(--shadow);
 }
-.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.stat-value { font-size: 1.8rem; font-weight: 700; color: #333; }
 .stat-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; }
 
 /* ===== CHART ===== */
@@ -368,6 +368,43 @@ tr:hover { background: var(--bg-secondary); }
 @media (max-width: 768px) {
   .compare-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== THUMBNAILS ===== */
+.thumb-img {
+  width: 80px; height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ===== SCROLLABLE COMMENTS ===== */
+.comment-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* ===== TREND CARDS ===== */
+.trend-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.trend-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.trend-card-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.trend-card-title a { color: #333; }
+.trend-card-title a:hover { color: var(--accent); }
+.sort-controls {
+  display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.sort-controls .btn.active-sort {
+  background: var(--accent); color: #fff;
+}
 </style>
 </head>
 <body>
@@ -429,9 +466,9 @@ tr:hover { background: var(--bg-secondary); }
     <div class="form-group">
       <label>Time Period</label>
       <select id="trendPeriod">
-        <option value="1">Last 24 Hours</option>
+        <option value="1" selected>Last 24 Hours</option>
         <option value="7">Last 7 Days</option>
-        <option value="30" selected>Last 30 Days</option>
+        <option value="30">Last 30 Days</option>
         <option value="90">Last 90 Days</option>
       </select>
     </div>
@@ -486,8 +523,9 @@ tr:hover { background: var(--bg-secondary); }
     <div class="form-group">
       <label>Date Range</label>
       <select id="perceptionRange">
+        <option value="1" selected>Last 24 Hours</option>
         <option value="7">Last 7 Days</option>
-        <option value="30" selected>Last 30 Days</option>
+        <option value="30">Last 30 Days</option>
         <option value="90">Last 90 Days</option>
       </select>
     </div>
@@ -741,6 +779,21 @@ function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function renderThumbnail(post) {
+  const t = post.thumbnail || '';
+  if (t && !['self','default','nsfw','spoiler',''].includes(t) && t.startsWith('http')) {
+    return `<img src="${escapeHtml(t)}" class="thumb-img" onerror="this.style.display='none'" alt="">`;
+  }
+  const url = (post.url || '');
+  if (/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) {
+    return `<img src="${escapeHtml(url)}" class="thumb-img" onerror="this.style.display='none'" alt="">`;
+  }
+  if (/youtube\.com|youtu\.be/i.test(url)) return '<span class="badge badge-red">YT</span>';
+  if (/streamable\.com/i.test(url)) return '<span class="badge badge-blue">Video</span>';
+  if (/twitter\.com|x\.com/i.test(url)) return '<span class="badge badge-blue">Tweet</span>';
+  return '';
+}
+
 function postPermalink(post) {
   return `https://www.reddit.com/r/${post.subreddit}/comments/${(post.id || '').replace('t3_','')}/`;
 }
@@ -859,6 +912,7 @@ const rumorSortState = {};
 const RUMOR_SUBS = ['nba', 'nbadiscussion', 'NBA_TradeDiscussions'];
 
 const RUMOR_COLUMNS = [
+  { field: 'thumbnail', label: 'Media', render: p => renderThumbnail(p) },
   { field: 'title', label: 'Title', render: p => `<a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a>` },
   { field: 'subreddit', label: 'Subreddit', render: p => `<span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span>` },
   { field: 'score', label: 'Score', defaultSort: true, render: p => (p.score||0).toLocaleString() },
@@ -879,8 +933,7 @@ async function searchRumors() {
     const allPosts = [];
     for (const sub of RUMOR_SUBS) {
       const res = await api('/posts/search', {
-        subreddit: sub, query, after, before, limit: 100,
-        fields: 'id,title,subreddit,score,num_comments,created_utc,author'
+        subreddit: sub, query, after, before, limit: 100
       });
       if (res.data) allPosts.push(...res.data);
     }
@@ -943,6 +996,7 @@ function exportRumorCSV() {
 // =============================================================================
 let trendData = [];
 let trendTopics = {};
+let trendCardSort = { field: 'score', asc: false };
 
 async function loadTrends() {
   const days = parseInt(document.getElementById('trendPeriod').value);
@@ -952,12 +1006,11 @@ async function loadTrends() {
   try {
     const after = daysAgo(days);
     const res = await api('/posts/search', {
-      subreddit: 'nba', after, limit: 'auto', sort: 'desc',
-      fields: 'id,title,subreddit,score,num_comments,created_utc,author'
+      subreddit: 'nba', after, limit: 'auto', sort: 'desc'
     });
     trendData = (res.data || []).sort((a, b) => (b.score || 0) - (a.score || 0));
 
-    // Categorize posts
+    // Categorize posts into topics
     trendTopics = {};
     Object.keys(TOPIC_KEYWORDS).forEach(t => { trendTopics[t] = { posts: [], totalScore: 0, totalComments: 0 }; });
     trendTopics['other'] = { posts: [], totalScore: 0, totalComments: 0 };
@@ -1020,79 +1073,121 @@ async function loadTrends() {
         <tbody>${highPerformers.map(u => `<tr><td><span class="badge badge-green">${u.topic}</span></td><td>${u.count}</td><td>${u.avgScore.toLocaleString()}</td><td>${u.totalEngagement.toLocaleString()}</td></tr>`).join('')}</tbody></table></div></div>`;
     } else { underEl.style.display = 'none'; }
 
-    // Results grouped by topic
-    let html = '';
-    topicNames.sort((a, b) => (trendTopics[b].totalScore + trendTopics[b].totalComments) - (trendTopics[a].totalScore + trendTopics[a].totalComments));
-    topicNames.forEach((topic, idx) => {
-      const tp = trendTopics[topic];
-      const topPosts = tp.posts.slice(0, 10);
-      const tableId = `trendTable_${idx}`;
-      html += `<div class="card"><div class="card-title">${topic.charAt(0).toUpperCase() + topic.slice(1)} <span class="badge badge-blue">${tp.posts.length} posts</span></div>
-        <div id="${tableId}"></div>
-        <div id="trendComments_${idx}"><button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="loadTrendComments('${topic}', ${idx})">Load Top & Bottom Comments</button></div>
-      </div>`;
-    });
-    resultsEl.innerHTML = html || '<div class="empty-state">No categorized posts found.</div>';
-
-    // Render sortable tables for each topic
-    topicNames.forEach((topic, idx) => {
-      const tp = trendTopics[topic];
-      const tableId = `trendTable_${idx}`;
-      const state = {};
-      renderSortableTable(tableId, tp.posts.slice(0, 10), [
-        { field: 'title', label: 'Title', render: p => `<a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a>` },
-        { field: 'score', label: 'Score', defaultSort: true, render: p => (p.score||0).toLocaleString() },
-        { field: 'num_comments', label: 'Comments', render: p => (p.num_comments||0).toLocaleString() },
-        { field: 'created_utc', label: 'Date', render: p => formatDate(p.created_utc) }
-      ], state);
-    });
+    // Unified "All Trending Content"
+    resultsEl.innerHTML = `
+      <h3 style="margin:20px 0 12px;color:#333;font-size:1.1rem">All Trending Content</h3>
+      <div class="sort-controls">
+        <button class="btn btn-sm active-sort" data-sort="score" onclick="sortTrendCards('score')">Score</button>
+        <button class="btn btn-sm btn-secondary" data-sort="num_comments" onclick="sortTrendCards('num_comments')">Comments</button>
+        <button class="btn btn-sm btn-secondary" data-sort="created_utc" onclick="sortTrendCards('created_utc')">Date</button>
+      </div>
+      <div id="trendCards"></div>`;
+    trendCardSort = { field: 'score', asc: false };
+    renderTrendCards();
 
   } catch (err) {
     showError(resultsEl, 'Error loading trends: ' + err.message);
   }
 }
 
-async function loadTrendComments(topic, idx) {
-  const el = document.getElementById(`trendComments_${idx}`);
-  el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading comments...</div>';
-  const tp = trendTopics[topic];
-  if (!tp || !tp.posts.length) { el.innerHTML = '<div class="empty-state">No posts to load comments from.</div>'; return; }
+function sortTrendCards(field) {
+  if (trendCardSort.field === field) {
+    trendCardSort.asc = !trendCardSort.asc;
+  } else {
+    trendCardSort.field = field;
+    trendCardSort.asc = false;
+  }
+  // Update button styles
+  document.querySelectorAll('.sort-controls .btn').forEach(btn => {
+    const isActive = btn.dataset.sort === field;
+    btn.className = isActive ? 'btn btn-sm active-sort' : 'btn btn-sm btn-secondary';
+  });
+  renderTrendCards();
+}
+
+function renderTrendCards() {
+  const sorted = [...trendData].sort((a, b) => {
+    const va = a[trendCardSort.field] || 0, vb = b[trendCardSort.field] || 0;
+    return trendCardSort.asc ? va - vb : vb - va;
+  });
+  const cardsEl = document.getElementById('trendCards');
+  if (!cardsEl) return;
+  cardsEl.innerHTML = sorted.slice(0, 50).map(p => {
+    const pid = (p.id || '').replace('t3_', '');
+    const thumb = renderThumbnail(p);
+    return `<div class="card trend-card">
+      ${thumb ? `<div>${thumb}</div>` : ''}
+      <div class="trend-card-body">
+        <div class="trend-card-title"><a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a></div>
+        <div class="comment-meta">
+          <span>Score: ${(p.score||0).toLocaleString()}</span>
+          <span>${(p.num_comments||0).toLocaleString()} comments</span>
+          <span>${formatDate(p.created_utc)}</span>
+          <span>u/${escapeHtml(p.author || '[deleted]')}</span>
+        </div>
+        <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="loadPostComments('${pid}', this)">Load Top & Bottom Comments</button>
+        <div id="postComments_${pid}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadPostComments(postId, btn) {
+  const el = document.getElementById('postComments_' + postId);
+  if (el.innerHTML && el.style.display !== 'none') {
+    el.style.display = 'none';
+    btn.textContent = 'Load Top & Bottom Comments';
+    return;
+  }
+  if (el.innerHTML) {
+    el.style.display = 'block';
+    btn.textContent = 'Hide Comments';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
 
   try {
-    const topPostIds = tp.posts.slice(0, 3).map(p => (p.id || '').replace('t3_', ''));
-    let allComments = [];
-    for (const pid of topPostIds) {
-      try {
-        const res = await api('/comments/tree', { link_id: 't3_' + pid, limit: 10 });
-        const comments = parseTreeComments(res.data);
-        allComments.push(...comments);
-      } catch {}
+    const res = await api('/comments/search', {
+      link_id: 't3_' + postId, limit: 25,
+      fields: 'id,body,subreddit,score,author,created_utc,link_id'
+    });
+    const comments = (res.data || []);
+
+    if (!comments.length) {
+      el.innerHTML = '<div class="empty-state" style="padding:12px">No comments found.</div>';
+      btn.textContent = 'No Comments';
+      btn.disabled = false;
+      return;
     }
 
-    if (!allComments.length) { el.innerHTML = '<div class="empty-state">No comments found.</div>'; return; }
+    comments.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const top3 = comments.slice(0, 3);
+    const bottom3 = comments.filter(c => (c.score || 0) < 1).sort((a, b) => (a.score || 0) - (b.score || 0)).slice(0, 3);
 
-    allComments.sort((a, b) => (b.score || 0) - (a.score || 0));
-    const top3 = allComments.slice(0, 3);
-    const bottom3 = allComments.filter(c => (c.score || 0) < 1).sort((a, b) => (a.score || 0) - (b.score || 0)).slice(0, 3);
-
-    let html = '<div style="margin-top:12px"><strong style="color:var(--success)">Most Upvoted Comments:</strong>';
+    let html = '<div style="margin-top:12px">';
+    html += '<strong style="color:var(--success)">Most Upvoted:</strong>';
     top3.forEach(c => {
-      html += `<div class="comment-card"><div class="comment-body">${escapeHtml(truncate(c.body, 300))}</div>
-        <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${c.score || 0}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
+      html += `<div class="comment-card"><div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
+        <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
     });
-
-    if (bottom3.length > 0) {
-      html += '<strong style="color:var(--danger)">Most Downvoted Comments:</strong>';
+    if (bottom3.length) {
+      html += '<strong style="color:var(--danger)">Most Downvoted:</strong>';
       bottom3.forEach(c => {
-        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body">${escapeHtml(truncate(c.body, 300))}</div>
-          <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${c.score || 0}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
+        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
+          <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
       });
     }
     html += '</div>';
     el.innerHTML = html;
+    el.style.display = 'block';
+    btn.textContent = 'Hide Comments';
   } catch (err) {
     el.innerHTML = `<div class="error-msg">Error loading comments: ${escapeHtml(err.message)}</div>`;
+    btn.textContent = 'Retry';
   }
+  btn.disabled = false;
 }
 
 // =============================================================================
@@ -1228,21 +1323,51 @@ async function analyzePerception() {
   const days = parseInt(document.getElementById('perceptionRange').value);
   const after = daysAgo(days);
   const resultsEl = document.getElementById('perceptionResults');
-  showLoading(resultsEl);
 
   const selectedSubs = ['nba'];
   document.querySelectorAll('#perceptionTeams input:checked').forEach(cb => {
     if (selectedSubs.length < 6) selectedSubs.push(cb.value);
   });
 
+  resultsEl.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> <span id="perceptionProgress">Analyzing r/nba...</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="perceptionProgressFill"></div></div>`;
+
   try {
     const subResults = {};
+    let completed = 0;
+
     for (const sub of selectedSubs) {
-      const res = await api('/comments/search', {
-        subreddit: sub, body: player, after, limit: 100,
-        fields: 'id,body,subreddit,score,author,created_utc,link_id'
-      });
-      subResults[sub] = res.data || [];
+      const progressEl = document.getElementById('perceptionProgress');
+      const fillEl = document.getElementById('perceptionProgressFill');
+      if (progressEl) progressEl.textContent = `Analyzing r/${sub}... (${completed + 1}/${selectedSubs.length})`;
+      if (fillEl) fillEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
+
+      let retries = 0;
+      const maxRetries = 2;
+      let success = false;
+
+      while (retries <= maxRetries && !success) {
+        try {
+          const res = await api('/comments/search', {
+            subreddit: sub, body: player, after, limit: 25,
+            fields: 'id,body,subreddit,score,author,created_utc,link_id'
+          });
+          subResults[sub] = res.data || [];
+          success = true;
+        } catch (e) {
+          retries++;
+          if (retries > maxRetries) {
+            console.warn(`Skipping r/${sub}: ${e.message}`);
+            subResults[sub] = [];
+          } else {
+            const delay = 1000 * Math.pow(2, retries - 1);
+            console.log(`Retrying r/${sub} in ${delay}ms (attempt ${retries}/${maxRetries})`);
+            await new Promise(r => setTimeout(r, delay));
+          }
+        }
+      }
+      completed++;
+      if (fillEl) fillEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
     }
 
     // Per-subreddit stats
@@ -1282,12 +1407,12 @@ async function analyzePerception() {
     subStats.forEach(s => {
       html += `<div class="card"><div class="card-title">r/${escapeHtml(s.sub)} <span class="badge badge-blue">${s.count} comments</span> <span class="badge badge-orange">Avg: ${s.avgScore}</span></div>`;
       if (s.maxComment) {
-        html += `<div class="comment-card"><div class="comment-body">${escapeHtml(truncate(s.maxComment.body, 300))}</div>
+        html += `<div class="comment-card"><div class="comment-body comment-scroll">${escapeHtml(s.maxComment.body || '')}</div>
           <div class="comment-meta"><span>u/${escapeHtml(s.maxComment.author)}</span><span>Score: ${s.maxComment.score}</span><span>${formatDate(s.maxComment.created_utc)}</span>
           <a href="${commentPermalink(s.maxComment)}" target="_blank">View</a></div></div>`;
       }
       if (s.minComment && s.minComment !== s.maxComment) {
-        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body">${escapeHtml(truncate(s.minComment.body, 300))}</div>
+        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body comment-scroll">${escapeHtml(s.minComment.body || '')}</div>
           <div class="comment-meta"><span>u/${escapeHtml(s.minComment.author)}</span><span>Score: ${s.minComment.score}</span><span>${formatDate(s.minComment.created_utc)}</span>
           <a href="${commentPermalink(s.minComment)}" target="_blank">View</a></div></div>`;
       }
@@ -1337,11 +1462,8 @@ async function findViralTakes() {
 
     resultsEl.innerHTML = `<p style="color:var(--text-secondary);margin-bottom:12px">${socialData.length} viral takes found (score >= ${minScore})</p>` +
       socialData.map((c, i) => {
-        const bodyShort = truncate(c.body, 280);
-        const bodyFull = c.body || '';
         return `<div class="comment-card">
-          <div class="comment-body" id="social-body-${i}">${escapeHtml(bodyShort)}</div>
-          ${bodyFull.length > 280 ? `<a href="#" onclick="document.getElementById('social-full-${i}').style.display='block';this.style.display='none';return false" style="font-size:0.8rem">Show full comment</a><div id="social-full-${i}" style="display:none" class="comment-body">${escapeHtml(bodyFull)}</div>` : ''}
+          <div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
           <div class="comment-meta">
             <span>u/${escapeHtml(c.author)}</span>
             <span>Score: ${(c.score||0).toLocaleString()}</span>
@@ -1495,27 +1617,31 @@ async function searchHistory() {
 
   try {
     const res = await api('/posts/search', {
-      subreddit: 'nba', query, after, before, limit: 100,
-      fields: 'id,title,subreddit,score,num_comments,created_utc,author,selftext'
+      subreddit: 'nba', query, after, before, limit: 100
     });
     historyData = (res.data || []).sort((a, b) => ((b.score||0) + (b.num_comments||0)) - ((a.score||0) + (a.num_comments||0)));
 
     if (!historyData.length) { showEmpty(resultsEl, 'No posts found for that query and date range.'); return; }
 
-    resultsEl.innerHTML = historyData.slice(0, 50).map(p => `
-      <div class="card">
-        <div class="card-title"><a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a></div>
-        <div class="comment-meta">
-          <span>u/${escapeHtml(p.author)}</span>
-          <span>Score: ${(p.score||0).toLocaleString()}</span>
-          <span>${(p.num_comments||0).toLocaleString()} comments</span>
-          <span>${formatDate(p.created_utc)}</span>
-          <span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span>
+    resultsEl.innerHTML = historyData.slice(0, 50).map(p => {
+      const thumb = renderThumbnail(p);
+      return `<div class="card" style="display:flex;gap:12px;align-items:flex-start">
+        ${thumb ? `<div>${thumb}</div>` : ''}
+        <div style="flex:1;min-width:0">
+          <div class="card-title"><a href="${postPermalink(p)}" target="_blank">${escapeHtml(p.title)}</a></div>
+          <div class="comment-meta">
+            <span>u/${escapeHtml(p.author)}</span>
+            <span>Score: ${(p.score||0).toLocaleString()}</span>
+            <span>${(p.num_comments||0).toLocaleString()} comments</span>
+            <span>${formatDate(p.created_utc)}</span>
+            <span class="badge badge-orange">r/${escapeHtml(p.subreddit)}</span>
+          </div>
+          ${p.selftext ? `<div class="comment-scroll" style="margin-top:8px;color:var(--text-secondary);font-size:0.85rem">${escapeHtml(p.selftext)}</div>` : ''}
+          <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="expandThread('${(p.id||'').replace('t3_','')}', this)">Expand Thread</button>
+          <div id="thread-${(p.id||'').replace('t3_','')}" class="expand-content"></div>
         </div>
-        ${p.selftext ? `<div style="margin-top:8px;color:var(--text-secondary);font-size:0.85rem">${escapeHtml(truncate(p.selftext, 200))}</div>` : ''}
-        <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="expandThread('${(p.id||'').replace('t3_','')}', this)">Expand Thread</button>
-        <div id="thread-${(p.id||'').replace('t3_','')}" class="expand-content"></div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch (err) {
     showError(resultsEl, 'Error searching history: ' + err.message);
   }
@@ -1543,7 +1669,7 @@ async function expandThread(postId, btn) {
     } else {
       threadEl.innerHTML = comments.slice(0, 15).map(c => `
         <div class="comment-card">
-          <div class="comment-body">${escapeHtml(truncate(c.body, 300))}</div>
+          <div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
           <div class="comment-meta">
             <span>u/${escapeHtml(c.author || '[deleted]')}</span>
             <span>Score: ${c.score || 0}</span>
@@ -1582,7 +1708,7 @@ async function generateBrief() {
       const comments = parseTreeComments(res.data).slice(0, 3);
       comments.forEach((c, j) => {
         brief += `> **Top Comment ${j + 1}** (Score: ${c.score || 0}, u/${c.author || 'deleted'}):\n`;
-        brief += `> ${truncate(c.body || '', 200)}\n\n`;
+        brief += `> ${(c.body || '').trim()}\n\n`;
       });
     } catch {
       brief += `> *Could not load comments for this post.*\n\n`;
@@ -1602,16 +1728,15 @@ async function generateBrief() {
 // =============================================================================
 function init() {
   const today = new Date().toISOString().split('T')[0];
-  const thirtyAgo = daysAgo(30);
-  const ninetyAgo = daysAgo(90);
+  const oneDayAgo = daysAgo(1);
 
-  document.getElementById('rumorAfter').value = thirtyAgo;
+  document.getElementById('rumorAfter').value = oneDayAgo;
   document.getElementById('rumorBefore').value = today;
-  document.getElementById('socialAfter').value = thirtyAgo;
+  document.getElementById('socialAfter').value = oneDayAgo;
   document.getElementById('socialBefore').value = today;
-  document.getElementById('sentimentAfter').value = ninetyAgo;
+  document.getElementById('sentimentAfter').value = oneDayAgo;
   document.getElementById('sentimentBefore').value = today;
-  document.getElementById('historyAfter').value = '2020-01-01';
+  document.getElementById('historyAfter').value = oneDayAgo;
   document.getElementById('historyBefore').value = today;
 
   const teamOptions = Object.entries(NBA_TEAMS).map(([team, sub]) =>
