@@ -478,6 +478,16 @@ tr:hover { background: var(--bg-secondary); }
   <div id="trendChart" class="chart-container" style="display:none"><canvas id="trendChartCanvas"></canvas></div>
   <div id="trendUnderserved" style="display:none"></div>
   <div id="trendResults"><div class="empty-state">Select a time period and click Analyze to detect trending topics on r/nba.</div></div>
+
+  <!-- STANDALONE: Top & Bottom Comments Section -->
+  <div id="standaloneCommentsSection" style="margin-top:24px">
+    <div class="card">
+      <div class="card-title" style="font-size:1.1rem">Most Upvoted & Most Downvoted Comments on r/nba</div>
+      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:12px">Fetches the highest and lowest scored comments for the selected time period. Scores reflect archived data and may not match live Reddit.</p>
+      <button class="btn" onclick="loadStandaloneComments()">Load Comments</button>
+      <div id="standaloneCommentsResults" style="margin-top:12px"></div>
+    </div>
+  </div>
 </div>
 
 <!-- TAB 3: FAN SENTIMENT -->
@@ -1127,6 +1137,8 @@ function renderTrendCards() {
         </div>
         <button class="btn btn-sm btn-secondary" style="margin-top:8px" onclick="loadPostComments('${pid}', this)">Load Top & Bottom Comments</button>
         <div id="postComments_${pid}"></div>
+        <button class="btn btn-sm btn-secondary" style="margin-top:4px;font-size:0.75rem" onclick="loadPostCommentPreview('${pid}', this)">Show Top & Bottom Comment</button>
+        <div id="postPreview_${pid}"></div>
       </div>
     </div>`;
   }).join('');
@@ -1770,6 +1782,142 @@ async function checkApiStatus() {
     document.getElementById('apiDot').className = 'api-dot offline';
     document.getElementById('apiStatusText').textContent = 'API Offline';
   }
+}
+
+// =============================================================================
+// STANDALONE: Top & Bottom Comments on r/nba
+// Self-contained — does not touch any existing variables or functions
+// =============================================================================
+async function loadStandaloneComments() {
+  const resultsEl = document.getElementById('standaloneCommentsResults');
+  const days = parseInt(document.getElementById('trendPeriod').value);
+  const after = daysAgo(days);
+
+  resultsEl.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading top & bottom comments...</div>';
+
+  let topComments = [];
+  let bottomComments = [];
+
+  try {
+    // Fetch top-scored comments
+    const topRes = await api('/comments/search', { subreddit: 'nba', after, limit: 100 });
+    const allComments = (topRes.data || []).filter(c => c.body && c.body !== '[deleted]' && c.body !== '[removed]');
+
+    if (!allComments.length) {
+      resultsEl.innerHTML = '<div class="empty-state">No comments found for this time period.</div>';
+      return;
+    }
+
+    // Sort client-side by score (API only supports time-based sorting)
+    allComments.sort((a, b) => (b.score || 0) - (a.score || 0));
+    topComments = allComments.slice(0, 5);
+    bottomComments = allComments.slice(-5).reverse();
+
+    function renderStandaloneComment(c) {
+      const permalink = commentPermalink(c);
+      return `<div class="comment-card" style="margin:8px 0">
+        <div class="comment-body">${escapeHtml(c.body || '')}</div>
+        <div class="comment-meta">
+          <span>u/${escapeHtml(c.author || '[deleted]')}</span>
+          <span>Score: ${(c.score||0).toLocaleString()}</span>
+          <span>${formatDate(c.created_utc)}</span>
+          <a href="${permalink}" target="_blank" style="color:var(--accent)">View on Reddit</a>
+        </div>
+      </div>`;
+    }
+
+    resultsEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card" style="border-left:4px solid #22c55e;margin:0">
+          <div class="card-title" style="color:#22c55e">Most Upvoted</div>
+          ${topComments.map(c => renderStandaloneComment(c)).join('')}
+        </div>
+        <div class="card" style="border-left:4px solid #ef4444;margin:0">
+          <div class="card-title" style="color:#ef4444">Most Downvoted</div>
+          ${bottomComments.map(c => renderStandaloneComment(c)).join('')}
+        </div>
+      </div>`;
+  } catch (err) {
+    resultsEl.innerHTML = `<div class="error-msg">Error loading comments: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// =============================================================================
+// PER-POST COMMENT PREVIEW
+// Self-contained — each button works independently
+// =============================================================================
+async function loadPostCommentPreview(postId, btn) {
+  const el = document.getElementById('postPreview_' + postId);
+
+  // Toggle if already loaded
+  if (el.innerHTML && el.style.display !== 'none') {
+    el.style.display = 'none';
+    btn.textContent = 'Show Top & Bottom Comment';
+    return;
+  }
+  if (el.innerHTML) {
+    el.style.display = 'block';
+    btn.textContent = 'Hide Preview';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+
+  try {
+    const res = await api('/comments/search', { link_id: 't3_' + postId, limit: 100 });
+    const comments = (res.data || []).filter(c => c.body && c.body !== '[deleted]' && c.body !== '[removed]');
+
+    if (!comments.length) {
+      el.innerHTML = '<div class="empty-state" style="padding:8px;font-size:0.85rem">No comments found.</div>';
+      btn.textContent = 'No Comments';
+      btn.disabled = false;
+      return;
+    }
+
+    comments.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const topComment = comments[0];
+    const bottomComment = comments[comments.length - 1];
+
+    let html = '<div style="margin-top:8px">';
+
+    // Top comment
+    html += `<div class="comment-card" style="border-left:3px solid #22c55e;margin:6px 0">
+      <div style="font-size:0.7rem;font-weight:600;color:#22c55e;margin-bottom:4px">TOP COMMENT</div>
+      <div class="comment-body" style="font-size:0.85rem">${escapeHtml(topComment.body || '')}</div>
+      <div class="comment-meta">
+        <span>u/${escapeHtml(topComment.author || '[deleted]')}</span>
+        <span>Score: ${(topComment.score||0).toLocaleString()}</span>
+        <span>${formatDate(topComment.created_utc)}</span>
+        <a href="${commentPermalink(topComment)}" target="_blank" style="color:var(--accent)">View</a>
+      </div>
+    </div>`;
+
+    // Bottom comment (only show if different from top and has lower score)
+    if (bottomComment.id !== topComment.id && (bottomComment.score || 0) < (topComment.score || 0)) {
+      html += `<div class="comment-card" style="border-left:3px solid #ef4444;margin:6px 0">
+        <div style="font-size:0.7rem;font-weight:600;color:#ef4444;margin-bottom:4px">BOTTOM COMMENT</div>
+        <div class="comment-body" style="font-size:0.85rem">${escapeHtml(bottomComment.body || '')}</div>
+        <div class="comment-meta">
+          <span>u/${escapeHtml(bottomComment.author || '[deleted]')}</span>
+          <span>Score: ${(bottomComment.score||0).toLocaleString()}</span>
+          <span>${formatDate(bottomComment.created_utc)}</span>
+          <a href="${commentPermalink(bottomComment)}" target="_blank" style="color:var(--accent)">View</a>
+        </div>
+      </div>`;
+    }
+
+    html += '<div style="font-size:0.7rem;color:var(--text-secondary);font-style:italic;margin-top:4px">Comment scores may not reflect final votes due to archival timing.</div>';
+    html += '</div>';
+
+    el.innerHTML = html;
+    el.style.display = 'block';
+    btn.textContent = 'Hide Preview';
+  } catch (err) {
+    el.innerHTML = `<div style="color:var(--danger);font-size:0.85rem;padding:8px">Could not load comments: ${escapeHtml(err.message)}</div>`;
+    btn.textContent = 'Retry';
+  }
+  btn.disabled = false;
 }
 
 document.addEventListener('DOMContentLoaded', init);
