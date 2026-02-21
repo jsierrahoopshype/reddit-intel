@@ -425,8 +425,8 @@ tr:hover { background: var(--bg-secondary); }
 
 <!-- ===== TAB NAV ===== -->
 <nav class="tab-nav" id="tabNav">
-  <button class="tab-btn active" data-tab="rumors">Rumor & Buzz Tracker</button>
-  <button class="tab-btn" data-tab="trends">Trend Detection</button>
+  <button class="tab-btn" data-tab="rumors">Rumor & Buzz Tracker</button>
+  <button class="tab-btn active" data-tab="trends">Trend Detection</button>
   <button class="tab-btn" data-tab="sentiment">Fan Sentiment</button>
   <button class="tab-btn" data-tab="perception">Player Perception</button>
   <button class="tab-btn" data-tab="social">Content Sourcing</button>
@@ -438,7 +438,7 @@ tr:hover { background: var(--bg-secondary); }
 <main class="main">
 
 <!-- TAB 1: RUMOR TRACKER -->
-<div class="tab-panel active" id="tab-rumors">
+<div class="tab-panel" id="tab-rumors">
   <div class="controls">
     <div class="form-group">
       <label>Keyword / Player</label>
@@ -461,7 +461,7 @@ tr:hover { background: var(--bg-secondary); }
 </div>
 
 <!-- TAB 2: TREND DETECTION -->
-<div class="tab-panel" id="tab-trends">
+<div class="tab-panel active" id="tab-trends">
   <div class="controls">
     <div class="form-group">
       <label>Time Period</label>
@@ -1747,6 +1747,9 @@ function init() {
     `<label class="team-checkbox"><input type="checkbox" value="${sub}"> ${team}</label>`).join('');
 
   checkApiStatus();
+
+  // Auto-load Trend Detection with Last 24 Hours on startup
+  setTimeout(() => loadTrends(), 300);
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
