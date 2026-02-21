@@ -430,17 +430,9 @@ tr:hover { background: var(--bg-secondary); }
 .clickable-comment { display: block; text-decoration: none; color: inherit; }
 .clickable-comment:hover { text-decoration: none; }
 .clickable-comment:hover .comment-card { background: #f0f1f3; }
-#debugBanner {
-  background: #fef3c7; border-bottom: 2px solid #f59e0b; padding: 8px 16px;
-  font-family: monospace; font-size: 0.8rem; color: #92400e;
-  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
-}
-#debugBanner strong { color: #78350f; }
 </style>
 </head>
 <body>
-
-<div id="debugBanner"><strong>DEBUG:</strong> <span id="debugUrl">No API calls yet</span> | <span id="debugCount">Results: —</span> | <span id="debugMaxScore">Max Score: —</span></div>
 
 <!-- ===== HEADER ===== -->
 <header class="header">
@@ -499,8 +491,8 @@ tr:hover { background: var(--bg-secondary); }
     <div class="form-group">
       <label>Time Period</label>
       <select id="trendPeriod">
-        <option value="6">Last 6 Hours</option>
-        <option value="24" selected>Last 24 Hours</option>
+        <option value="6" selected>Last 6 Hours</option>
+        <option value="24">Last 24 Hours</option>
         <option value="168">Last 7 Days</option>
         <option value="720">Last 30 Days</option>
         <option value="2160">Last 90 Days</option>
@@ -561,8 +553,8 @@ tr:hover { background: var(--bg-secondary); }
     <div class="form-group">
       <label>Date Range</label>
       <select id="perceptionRange">
-        <option value="6">Last 6 Hours</option>
-        <option value="24" selected>Last 24 Hours</option>
+        <option value="6" selected>Last 6 Hours</option>
+        <option value="24">Last 24 Hours</option>
         <option value="168">Last 7 Days</option>
         <option value="720">Last 30 Days</option>
         <option value="2160">Last 90 Days</option>
@@ -849,17 +841,11 @@ async function api(endpoint, params = {}) {
   const qs = new URLSearchParams(filtered).toString();
   const url = `${API_BASE}${endpoint}${qs ? '?' + qs : ''}`;
 
-  // Debug: log every API call to console AND debug banner
+  // Debug: log every API call
   console.log('[API]', url);
-  const dbUrl = document.getElementById('debugUrl');
-  if (dbUrl) dbUrl.textContent = url.replace(API_BASE, '');
 
   const cached = Cache.get(url);
-  if (cached) {
-    console.log('[API] Cache hit');
-    updateDebugBanner(cached);
-    return cached;
-  }
+  if (cached) { console.log('[API] Cache hit'); return cached; }
 
   await RateLimiter();
   const res = await fetch(url);
@@ -874,21 +860,7 @@ async function api(endpoint, params = {}) {
     throw new Error(`API: ${json.error}`);
   }
   Cache.set(url, json);
-  updateDebugBanner(json);
   return json;
-}
-
-function updateDebugBanner(json) {
-  const dbCount = document.getElementById('debugCount');
-  const dbMax = document.getElementById('debugMaxScore');
-  if (!dbCount || !dbMax) return;
-  const data = json.data || [];
-  dbCount.textContent = `Results: ${data.length}`;
-  if (data.length > 0) {
-    const scores = data.map(d => d.score || 0);
-    const maxScore = Math.max(...scores);
-    dbMax.textContent = `Max Score: ${maxScore.toLocaleString()}`;
-  }
 }
 
 // =============================================================================
@@ -1101,7 +1073,7 @@ async function searchRumors() {
     const allPosts = [];
     for (const sub of RUMOR_SUBS) {
       const res = await api('/posts/search', {
-        subreddit: sub, query, after, before, limit: 'auto'
+        subreddit: sub, query, after, before, limit: 100
       });
       if (res.data) allPosts.push(...res.data);
     }
@@ -1188,7 +1160,7 @@ async function loadTopComments() {
     let allComments = [];
     for (const sub of subs) {
       try {
-        const res = await apiWithRetry('/comments/search', { subreddit: sub, after, limit: 'auto' });
+        const res = await apiWithRetry('/comments/search', { subreddit: sub, after, limit: 100 });
         if (res.data) allComments.push(...res.data);
       } catch (e) { console.warn(`Top comments failed for r/${sub}:`, e.message); }
     }
@@ -1234,7 +1206,7 @@ async function loadTrends() {
   try {
     const after = hoursAgo(hours);
     const res = await apiWithRetry('/posts/search', {
-      subreddit: 'nba', after, limit: 'auto'
+      subreddit: 'nba', after, limit: 'auto', sort: 'desc'
     });
     trendData = (res.data || []).sort((a, b) => (b.score || 0) - (a.score || 0));
 
@@ -1378,7 +1350,7 @@ async function loadPostComments(postId, btn) {
 
   try {
     const res = await api('/comments/search', {
-      link_id: 't3_' + postId, limit: 100,
+      link_id: 't3_' + postId, limit: 25,
       fields: 'id,body,subreddit,score,author,created_utc,link_id'
     });
     const comments = (res.data || []);
@@ -1576,7 +1548,7 @@ async function analyzePerception() {
       if (pEl) pEl.textContent = `Searching r/${sub}... (${completed+1}/${selectedSubs.length})`;
       if (fEl) fEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
       try {
-        const res = await apiWithRetry('/comments/search', { subreddit: sub, body: player, after, limit: 100 });
+        const res = await apiWithRetry('/comments/search', { subreddit: sub, body: player, after, limit: 25 });
         subResults[sub] = res.data || [];
       } catch (e) {
         console.warn(`Skipping r/${sub}: ${e.message}`);
@@ -1739,7 +1711,7 @@ async function findViralTakes() {
 
   try {
     const res = await apiWithRetry('/comments/search', {
-      subreddit: 'nba', body: query, after, before, limit: 100,
+      subreddit: 'nba', body: query, after, before, limit: 25,
       fields: 'id,body,subreddit,score,author,created_utc,link_id'
     });
     socialData = (res.data || []).filter(c => (c.score || 0) >= minScore)
@@ -1906,7 +1878,7 @@ async function searchHistory() {
 
   try {
     const res = await api('/posts/search', {
-      subreddit: 'nba', query, after, before, limit: 'auto'
+      subreddit: 'nba', query, after, before, limit: 100
     });
     historyData = (res.data || []).sort((a, b) => ((b.score||0) + (b.num_comments||0)) - ((a.score||0) + (a.num_comments||0)));
 
