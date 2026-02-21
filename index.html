@@ -35,8 +35,8 @@ body {
   min-height: 100vh;
   line-height: 1.5;
 }
-a { color: var(--accent); text-decoration: none; }
-a:hover { color: var(--accent-hover); text-decoration: underline; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { color: var(--accent); text-decoration: underline; }
 
 /* ===== HEADER ===== */
 .header {
@@ -52,7 +52,7 @@ a:hover { color: var(--accent-hover); text-decoration: underline; }
   box-shadow: var(--shadow);
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
-.logo { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+.logo { font-size: 1.4rem; font-weight: 700; color: #333; }
 .logo-sub { font-size: 0.85rem; color: var(--text-secondary); }
 .api-status {
   display: flex; align-items: center; gap: 6px;
@@ -153,7 +153,7 @@ th {
   user-select: none;
   border-bottom: 2px solid var(--border);
 }
-th:hover { color: var(--accent); }
+th:hover { color: #333; font-weight: 700; }
 th .sort-arrow { font-size: 0.65rem; margin-left: 3px; }
 td {
   padding: 10px 12px;
@@ -405,6 +405,31 @@ tr:hover { background: var(--bg-secondary); }
 .sort-controls .btn.active-sort {
   background: var(--accent); color: #fff;
 }
+.sub-tab-controls {
+  display: flex; gap: 6px; margin-bottom: 16px;
+}
+.sub-tab-controls .btn.active-sort {
+  background: var(--accent); color: #fff;
+}
+.sentiment-gauge {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.gauge-score {
+  font-size: 3rem; font-weight: 700;
+}
+.gauge-bar {
+  width: 80%; height: 12px;
+  background: linear-gradient(to right, var(--danger), #e5e7eb 50%, var(--success));
+  border-radius: 6px; position: relative; margin-top: 12px;
+}
+.gauge-marker {
+  position: absolute; top: -4px; transform: translateX(-50%);
+  width: 16px; height: 16px; background: #333; border-radius: 50%;
+  border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.clickable-comment { display: block; text-decoration: none; color: inherit; }
+.clickable-comment:hover { text-decoration: none; }
+.clickable-comment:hover .comment-card { background: #f0f1f3; }
 </style>
 </head>
 <body>
@@ -425,8 +450,8 @@ tr:hover { background: var(--bg-secondary); }
 
 <!-- ===== TAB NAV ===== -->
 <nav class="tab-nav" id="tabNav">
-  <button class="tab-btn active" data-tab="rumors">Rumor & Buzz Tracker</button>
-  <button class="tab-btn" data-tab="trends">Trend Detection</button>
+  <button class="tab-btn" data-tab="rumors">Rumor & Buzz Tracker</button>
+  <button class="tab-btn active" data-tab="trends">Trend Detection</button>
   <button class="tab-btn" data-tab="sentiment">Fan Sentiment</button>
   <button class="tab-btn" data-tab="perception">Player Perception</button>
   <button class="tab-btn" data-tab="social">Content Sourcing</button>
@@ -438,7 +463,7 @@ tr:hover { background: var(--bg-secondary); }
 <main class="main">
 
 <!-- TAB 1: RUMOR TRACKER -->
-<div class="tab-panel active" id="tab-rumors">
+<div class="tab-panel" id="tab-rumors">
   <div class="controls">
     <div class="form-group">
       <label>Keyword / Player</label>
@@ -461,18 +486,23 @@ tr:hover { background: var(--bg-secondary); }
 </div>
 
 <!-- TAB 2: TREND DETECTION -->
-<div class="tab-panel" id="tab-trends">
+<div class="tab-panel active" id="tab-trends">
   <div class="controls">
     <div class="form-group">
       <label>Time Period</label>
       <select id="trendPeriod">
-        <option value="1" selected>Last 24 Hours</option>
-        <option value="7">Last 7 Days</option>
-        <option value="30">Last 30 Days</option>
-        <option value="90">Last 90 Days</option>
+        <option value="6" selected>Last 6 Hours</option>
+        <option value="24">Last 24 Hours</option>
+        <option value="168">Last 7 Days</option>
+        <option value="720">Last 30 Days</option>
+        <option value="2160">Last 90 Days</option>
       </select>
     </div>
-    <button class="btn" onclick="loadTrends()">Analyze Trends</button>
+    <button class="btn" onclick="currentTrendView==='posts'?loadTrends():loadTopComments()">Analyze</button>
+  </div>
+  <div class="sub-tab-controls">
+    <button class="btn btn-sm active-sort" id="trendSubPosts" onclick="switchTrendView('posts')">Top Posts</button>
+    <button class="btn btn-sm btn-secondary" id="trendSubComments" onclick="switchTrendView('comments')">Top Comments</button>
   </div>
   <div id="trendStats"></div>
   <div id="trendChart" class="chart-container" style="display:none"><canvas id="trendChartCanvas"></canvas></div>
@@ -523,10 +553,11 @@ tr:hover { background: var(--bg-secondary); }
     <div class="form-group">
       <label>Date Range</label>
       <select id="perceptionRange">
-        <option value="1" selected>Last 24 Hours</option>
-        <option value="7">Last 7 Days</option>
-        <option value="30">Last 30 Days</option>
-        <option value="90">Last 90 Days</option>
+        <option value="6" selected>Last 6 Hours</option>
+        <option value="24">Last 24 Hours</option>
+        <option value="168">Last 7 Days</option>
+        <option value="720">Last 30 Days</option>
+        <option value="2160">Last 90 Days</option>
       </select>
     </div>
     <button class="btn" onclick="analyzePerception()">Analyze</button>
@@ -684,6 +715,89 @@ const STOPWORDS = new Set(['the','a','an','is','are','was','were','be','been','b
   'player','team','season','year','nba','play','time','point','guy','people']);
 
 // =============================================================================
+// SENTIMENT ANALYSIS CONSTANTS
+// =============================================================================
+const POSITIVE_WORDS = new Set(['goat','amazing','incredible','beast','elite','love','great','best','mvp',
+  'dominant','clutch','unstoppable','underrated','gem','special','generational','insane','fire','w','dub',
+  'respect','legend','carry','star','skilled','smart','crafty','versatile','efficient','consistent',
+  'reliable','automatic','lethal','polished','creative','cerebral','unguardable','lockdown','dpoy',
+  'superstar','franchise','historic','cornerstone','untouchable','bargain','steal','max-worthy']);
+const NEGATIVE_WORDS = new Set(['bust','overrated','trash','terrible','worst','hate','sucks','washed',
+  'mid','l','fraud','overpaid','choker','liability','soft','disappointing','flop','garbage','bum','ass',
+  'awful','horrible','mediocre','turnover','inconsistent','passive','lazy','careless','turnover-prone',
+  'one-dimensional','predictable','injury-prone','streaky','invisible','disengaged','expendable','tradeable']);
+
+const ADJECTIVE_MAP = {};
+const ADJ_CATEGORIES = {
+  physical: { words: ['tall','long','fast','slow','strong','athletic','big','quick','agile','physical','lanky','massive','explosive','mobile'], sentiment: 'neutral' },
+  skill: { words: ['skilled','smart','crafty','versatile','efficient','consistent','reliable','automatic','lethal','polished','raw','creative','cerebral'], sentiment: 'positive' },
+  performance: { words: ['dominant','elite','clutch','unstoppable','unguardable','lockdown','dpoy','superstar','franchise','generational','historic','mvp-level','all-star','all-nba'], sentiment: 'positive' },
+  negPerformance: { words: ['inconsistent','passive','lazy','careless','turnover-prone','one-dimensional','predictable','injury-prone','streaky','invisible','disengaged'], sentiment: 'negative' },
+  value: { words: ['overpaid','underpaid','untouchable','tradeable','expendable','cornerstone','max-worthy','bargain','steal'], sentiment: 'mixed' }
+};
+Object.entries(ADJ_CATEGORIES).forEach(([cat, {words, sentiment}]) => {
+  words.forEach(w => {
+    let s = sentiment;
+    if (sentiment === 'mixed') s = ['overpaid','expendable','tradeable'].includes(w) ? 'negative' : 'positive';
+    ADJECTIVE_MAP[w] = { category: cat, sentiment: s };
+  });
+});
+
+const PLAYER_NICKNAMES = {
+  'lebron james':['lebron','bron','lbj'], 'victor wembanyama':['wemby','wembanyama'],
+  'anthony edwards':['ant','ant-man'], 'devin booker':['book','booker'],
+  'luka doncic':['luka','doncic'], 'jayson tatum':['tatum','jt'],
+  'giannis antetokounmpo':['giannis','greek freak'], 'nikola jokic':['jokic','joker'],
+  'stephen curry':['steph','curry'], 'kevin durant':['kd','durant'],
+  'joel embiid':['embiid','jojo'], 'jimmy butler':['jimmy','butler','jimmy buckets'],
+  'damian lillard':['dame','lillard'], 'ja morant':['ja','morant'],
+  'shai gilgeous-alexander':['sga','shai'], 'paolo banchero':['paolo','banchero'],
+  'chet holmgren':['chet','holmgren'], 'scottie barnes':['scottie','barnes'],
+  'tyrese haliburton':['haliburton'], 'donovan mitchell':['spida','mitchell'],
+  'zion williamson':['zion']
+};
+
+function classifySentiment(text) {
+  const words = text.toLowerCase().replace(/[^a-z0-9\s'-]/g,'').split(/\s+/);
+  let pos = 0, neg = 0;
+  words.forEach(w => { if (POSITIVE_WORDS.has(w)) pos++; if (NEGATIVE_WORDS.has(w)) neg++; });
+  if (pos > neg) return { sentiment: 'positive', posCount: pos, negCount: neg };
+  if (neg > pos) return { sentiment: 'negative', posCount: pos, negCount: neg };
+  return { sentiment: 'neutral', posCount: pos, negCount: neg };
+}
+
+function extractAdjectives(text, playerTokens) {
+  const words = text.toLowerCase().replace(/[^a-z0-9\s'-]/g,'').split(/\s+/);
+  const found = [];
+  const mentions = [];
+  for (let i = 0; i < words.length; i++) {
+    if (playerTokens.some(pt => words[i].includes(pt))) mentions.push(i);
+  }
+  if (mentions.length === 0) {
+    words.forEach(w => { if (ADJECTIVE_MAP[w]) found.push(w); });
+  } else {
+    mentions.forEach(pos => {
+      for (let j = Math.max(0, pos - 10); j < Math.min(words.length, pos + 11); j++) {
+        if (ADJECTIVE_MAP[words[j]]) found.push(words[j]);
+      }
+    });
+  }
+  return found;
+}
+
+function extractComparisons(text) {
+  const results = [];
+  const patterns = [
+    /(?:the\s+)?next\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)/g,
+    /reminds?\s+(?:me\s+)?of\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)/g,
+    /(?:like|similar\s+to)\s+(?:a\s+)?(?:young\s+)?([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)/g
+  ];
+  const skip = new Set(['The','This','That','These','Those','What','When','Where','There','They','Some','His','Her']);
+  patterns.forEach(re => { let m; while ((m = re.exec(text)) !== null) { if (!skip.has(m[1].split(' ')[0])) results.push(m[1].trim()); } });
+  return results;
+}
+
+// =============================================================================
 // UTILITIES: Rate Limiter
 // =============================================================================
 const RateLimiter = (() => {
@@ -769,6 +883,24 @@ function daysAgo(n) {
   return d.toISOString().split('T')[0];
 }
 
+function hoursAgo(h) {
+  return Math.floor((Date.now() - h * 3600000) / 1000);
+}
+
+async function apiWithRetry(endpoint, params = {}, maxRetries = 2) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await api(endpoint, params);
+    } catch (e) {
+      if (attempt < maxRetries) {
+        const delay = 1000 * Math.pow(2, attempt);
+        console.log(`[API] Retry ${attempt + 1}/${maxRetries} in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+      } else throw e;
+    }
+  }
+}
+
 function truncate(str, len) {
   if (!str) return '';
   return str.length > len ? str.substring(0, len) + '...' : str;
@@ -788,9 +920,17 @@ function renderThumbnail(post) {
   if (/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)) {
     return `<img src="${escapeHtml(url)}" class="thumb-img" onerror="this.style.display='none'" alt="">`;
   }
-  if (/youtube\.com|youtu\.be/i.test(url)) return '<span class="badge badge-red">YT</span>';
-  if (/streamable\.com/i.test(url)) return '<span class="badge badge-blue">Video</span>';
-  if (/twitter\.com|x\.com/i.test(url)) return '<span class="badge badge-blue">Tweet</span>';
+  if (/i\.redd\.it|i\.reddit\.com|i\.imgur\.com/i.test(url)) {
+    return `<img src="${escapeHtml(url)}" class="thumb-img" onerror="this.style.display='none'" alt="">`;
+  }
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) return `<img src="https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg" class="thumb-img" onerror="this.style.display='none'" alt="">`;
+  if (/v\.redd\.it/i.test(url)) {
+    if (t && t.startsWith('http')) return `<div style="position:relative;display:inline-block"><img src="${escapeHtml(t)}" class="thumb-img" alt=""><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5rem;text-shadow:0 1px 3px rgba(0,0,0,.5)">&#9654;</div></div>`;
+    return '<span class="badge badge-red" style="padding:4px 8px">Video</span>';
+  }
+  if (/streamable\.com/i.test(url)) return '<span class="badge badge-blue" style="padding:4px 8px">Video</span>';
+  if (/twitter\.com|x\.com/i.test(url)) return '<span class="badge badge-blue" style="padding:4px 8px">Tweet</span>';
   return '';
 }
 
@@ -997,15 +1137,75 @@ function exportRumorCSV() {
 let trendData = [];
 let trendTopics = {};
 let trendCardSort = { field: 'score', asc: false };
+let currentTrendView = 'posts';
+
+function switchTrendView(view) {
+  currentTrendView = view;
+  document.getElementById('trendSubPosts').className = view === 'posts' ? 'btn btn-sm active-sort' : 'btn btn-sm btn-secondary';
+  document.getElementById('trendSubComments').className = view === 'comments' ? 'btn btn-sm active-sort' : 'btn btn-sm btn-secondary';
+  if (view === 'posts') loadTrends(); else loadTopComments();
+}
+
+async function loadTopComments() {
+  const hours = parseInt(document.getElementById('trendPeriod').value);
+  const after = hoursAgo(hours);
+  const resultsEl = document.getElementById('trendResults');
+  showLoading(resultsEl);
+  document.getElementById('trendStats').innerHTML = '';
+  document.getElementById('trendChart').style.display = 'none';
+  document.getElementById('trendUnderserved').style.display = 'none';
+
+  try {
+    const subs = ['nba','nbadiscussion','NBA_TradeDiscussions'];
+    let allComments = [];
+    for (const sub of subs) {
+      try {
+        const res = await apiWithRetry('/comments/search', { subreddit: sub, after, limit: 100 });
+        if (res.data) allComments.push(...res.data);
+      } catch (e) { console.warn(`Top comments failed for r/${sub}:`, e.message); }
+    }
+    allComments.sort((a, b) => (b.score || 0) - (a.score || 0));
+    const top50 = allComments.slice(0, 50);
+
+    if (!top50.length) { showEmpty(resultsEl, 'No comments found for this time period.'); return; }
+
+    document.getElementById('trendStats').innerHTML = `<div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">${allComments.length}</div><div class="stat-label">Comments Fetched</div></div>
+      <div class="stat-card"><div class="stat-value">${(top50[0]?.score||0).toLocaleString()}</div><div class="stat-label">Highest Score</div></div>
+      <div class="stat-card"><div class="stat-value">${Math.round(top50.reduce((s,c) => s + (c.score||0), 0) / top50.length).toLocaleString()}</div><div class="stat-label">Avg Score (Top 50)</div></div>
+    </div>`;
+
+    resultsEl.innerHTML = top50.map((c, i) => {
+      const linkId = (c.link_id || '').replace('t3_', '');
+      const threadUrl = `https://www.reddit.com/r/${c.subreddit}/comments/${linkId}/`;
+      const cUrl = commentPermalink(c);
+      return `<div class="card">
+        <div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:6px">#${i+1} &middot; Thread: <a href="${threadUrl}" target="_blank">${escapeHtml(c.link_title || 'View thread')}</a></div>
+        <a href="${cUrl}" target="_blank" class="clickable-comment">
+          <div class="comment-body comment-scroll" style="color:#333">${escapeHtml(c.body || '')}</div>
+        </a>
+        <div class="comment-meta">
+          <span>u/${escapeHtml(c.author || '[deleted]')}</span>
+          <span>Score: ${(c.score||0).toLocaleString()}</span>
+          <span class="badge badge-orange">r/${escapeHtml(c.subreddit)}</span>
+          <span>${formatDate(c.created_utc)}</span>
+          <a href="${cUrl}" target="_blank">Permalink</a>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    showError(resultsEl, 'Error loading top comments: ' + err.message);
+  }
+}
 
 async function loadTrends() {
-  const days = parseInt(document.getElementById('trendPeriod').value);
+  const hours = parseInt(document.getElementById('trendPeriod').value);
   const resultsEl = document.getElementById('trendResults');
   showLoading(resultsEl);
 
   try {
-    const after = daysAgo(days);
-    const res = await api('/posts/search', {
+    const after = hoursAgo(hours);
+    const res = await apiWithRetry('/posts/search', {
       subreddit: 'nba', after, limit: 'auto', sort: 'desc'
     });
     trendData = (res.data || []).sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -1169,16 +1369,19 @@ async function loadPostComments(postId, btn) {
     let html = '<div style="margin-top:12px">';
     html += '<strong style="color:var(--success)">Most Upvoted:</strong>';
     top3.forEach(c => {
-      html += `<div class="comment-card"><div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
-        <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
+      const cUrl = commentPermalink(c);
+      html += `<a href="${cUrl}" target="_blank" class="clickable-comment"><div class="comment-card"><div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
+        <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>${formatDate(c.created_utc)}</span></div></div></a>`;
     });
     if (bottom3.length) {
       html += '<strong style="color:var(--danger)">Most Downvoted:</strong>';
       bottom3.forEach(c => {
-        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
-          <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>${formatDate(c.created_utc)}</span></div></div>`;
+        const cUrl = commentPermalink(c);
+        html += `<a href="${cUrl}" target="_blank" class="clickable-comment"><div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
+          <div class="comment-meta"><span>u/${escapeHtml(c.author || '[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>${formatDate(c.created_utc)}</span></div></div></a>`;
       });
     }
+    html += '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;font-style:italic">Note: Scores may not reflect final votes due to archival timing.</div>';
     html += '</div>';
     el.innerHTML = html;
     el.style.display = 'block';
@@ -1210,9 +1413,9 @@ async function loadSentiment() {
     async function fetchTeamData(sub) {
       // Use time_series for all three metrics (reliable, no 422 timeouts)
       const [posts, comments, scores] = await Promise.all([
-        api('/time_series', { key: `r/${sub}/posts/count`, precision, after, before }),
-        api('/time_series', { key: `r/${sub}/comments/count`, precision, after, before }),
-        api('/time_series', { key: `r/${sub}/posts/sum_score`, precision, after, before })
+        apiWithRetry('/time_series', { key: `r/${sub}/posts/count`, precision, after, before }),
+        apiWithRetry('/time_series', { key: `r/${sub}/comments/count`, precision, after, before }),
+        apiWithRetry('/time_series', { key: `r/${sub}/posts/sum_score`, precision, after, before })
       ]);
       return {
         posts: (posts.data || []).map(d => ({ date: d.date, value: d.value })),
@@ -1315,13 +1518,13 @@ async function loadSentiment() {
 }
 
 // =============================================================================
-// TAB 4: PLAYER PERCEPTION ANALYZER
+// TAB 4: PLAYER PERCEPTION — SENTIMENT ANALYSIS
 // =============================================================================
 async function analyzePerception() {
   const player = document.getElementById('perceptionPlayer').value.trim();
   if (!player) { toast('Please enter a player name.'); return; }
-  const days = parseInt(document.getElementById('perceptionRange').value);
-  const after = daysAgo(days);
+  const hours = parseInt(document.getElementById('perceptionRange').value);
+  const after = hoursAgo(hours);
   const resultsEl = document.getElementById('perceptionResults');
 
   const selectedSubs = ['nba'];
@@ -1329,104 +1532,163 @@ async function analyzePerception() {
     if (selectedSubs.length < 6) selectedSubs.push(cb.value);
   });
 
-  resultsEl.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> <span id="perceptionProgress">Analyzing r/nba...</span></div>
+  resultsEl.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> <span id="perceptionProgress">Searching r/nba...</span></div>
     <div class="progress-bar"><div class="progress-fill" id="perceptionProgressFill"></div></div>`;
 
   try {
+    const playerLower = player.toLowerCase();
+    const playerTokens = [...playerLower.split(/\s+/), ...(PLAYER_NICKNAMES[playerLower] || [])];
     const subResults = {};
     let completed = 0;
+    const skippedSubs = [];
 
     for (const sub of selectedSubs) {
-      const progressEl = document.getElementById('perceptionProgress');
-      const fillEl = document.getElementById('perceptionProgressFill');
-      if (progressEl) progressEl.textContent = `Analyzing r/${sub}... (${completed + 1}/${selectedSubs.length})`;
-      if (fillEl) fillEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
-
-      let retries = 0;
-      const maxRetries = 2;
-      let success = false;
-
-      while (retries <= maxRetries && !success) {
-        try {
-          const res = await api('/comments/search', {
-            subreddit: sub, body: player, after, limit: 25,
-            fields: 'id,body,subreddit,score,author,created_utc,link_id'
-          });
-          subResults[sub] = res.data || [];
-          success = true;
-        } catch (e) {
-          retries++;
-          if (retries > maxRetries) {
-            console.warn(`Skipping r/${sub}: ${e.message}`);
-            subResults[sub] = [];
-          } else {
-            const delay = 1000 * Math.pow(2, retries - 1);
-            console.log(`Retrying r/${sub} in ${delay}ms (attempt ${retries}/${maxRetries})`);
-            await new Promise(r => setTimeout(r, delay));
-          }
-        }
+      const pEl = document.getElementById('perceptionProgress');
+      const fEl = document.getElementById('perceptionProgressFill');
+      if (pEl) pEl.textContent = `Searching r/${sub}... (${completed+1}/${selectedSubs.length})`;
+      if (fEl) fEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
+      try {
+        const res = await apiWithRetry('/comments/search', { subreddit: sub, body: player, after, limit: 25 });
+        subResults[sub] = res.data || [];
+      } catch (e) {
+        console.warn(`Skipping r/${sub}: ${e.message}`);
+        subResults[sub] = [];
+        skippedSubs.push(sub);
       }
       completed++;
-      if (fillEl) fillEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
+      if (fEl) fEl.style.width = `${(completed / selectedSubs.length) * 100}%`;
     }
 
-    // Per-subreddit stats
-    const subStats = Object.entries(subResults).map(([sub, comments]) => {
-      const scores = comments.map(c => c.score || 0);
-      return {
-        sub, count: comments.length,
-        avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
-        maxComment: comments.reduce((best, c) => (!best || (c.score||0) > (best.score||0)) ? c : best, null),
-        minComment: comments.reduce((worst, c) => (!worst || (c.score||0) < (worst.score||0)) ? c : worst, null)
-      };
-    });
-
-    // Word frequency
     const allComments = Object.values(subResults).flat();
-    const wordCounts = {};
-    const playerWords = player.toLowerCase().split(/\s+/);
-    allComments.forEach(c => {
-      const words = (c.body || '').toLowerCase().replace(/[^a-z0-9\s'-]/g, '').split(/\s+/);
-      const seen = new Set();
-      words.forEach(w => {
-        if (w.length > 2 && !STOPWORDS.has(w) && !playerWords.includes(w) && !seen.has(w)) {
-          wordCounts[w] = (wordCounts[w] || 0) + 1;
-          seen.add(w);
-        }
-      });
-    });
-    const topWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 20);
+    if (!allComments.length) { showEmpty(resultsEl, `No comments mentioning "${player}" found.`); return; }
 
-    let html = '<div class="chart-container"><canvas id="perceptionChart"></canvas></div>';
-    html += `<div class="card"><div class="card-title">Top Words Associated with "${escapeHtml(player)}"</div>
-      <div class="word-cloud">${topWords.map(([w, c]) => {
-        const size = 0.7 + (c / (topWords[0]?.[1] || 1)) * 0.8;
-        return `<span class="word-tag" style="font-size:${size}rem">${escapeHtml(w)} (${c})</span>`;
-      }).join('')}</div></div>`;
-
-    subStats.forEach(s => {
-      html += `<div class="card"><div class="card-title">r/${escapeHtml(s.sub)} <span class="badge badge-blue">${s.count} comments</span> <span class="badge badge-orange">Avg: ${s.avgScore}</span></div>`;
-      if (s.maxComment) {
-        html += `<div class="comment-card"><div class="comment-body comment-scroll">${escapeHtml(s.maxComment.body || '')}</div>
-          <div class="comment-meta"><span>u/${escapeHtml(s.maxComment.author)}</span><span>Score: ${s.maxComment.score}</span><span>${formatDate(s.maxComment.created_utc)}</span>
-          <a href="${commentPermalink(s.maxComment)}" target="_blank">View</a></div></div>`;
-      }
-      if (s.minComment && s.minComment !== s.maxComment) {
-        html += `<div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body comment-scroll">${escapeHtml(s.minComment.body || '')}</div>
-          <div class="comment-meta"><span>u/${escapeHtml(s.minComment.author)}</span><span>Score: ${s.minComment.score}</span><span>${formatDate(s.minComment.created_utc)}</span>
-          <a href="${commentPermalink(s.minComment)}" target="_blank">View</a></div></div>`;
-      }
-      html += '</div>';
+    // Classify each comment
+    const classified = allComments.map(c => {
+      const sent = classifySentiment(c.body || '');
+      return { ...c, ...sent, adjectives: extractAdjectives(c.body || '', playerTokens), comparisons: extractComparisons(c.body || '') };
     });
+
+    const posCount = classified.filter(c => c.sentiment === 'positive').length;
+    const negCount = classified.filter(c => c.sentiment === 'negative').length;
+    const neutralCount = classified.filter(c => c.sentiment === 'neutral').length;
+    const total = classified.length;
+    const sentimentScore = total > 0 ? Math.round(((posCount - negCount) / total) * 100) : 0;
+
+    // Adjective frequency
+    const adjCounts = {};
+    classified.forEach(c => c.adjectives.forEach(a => {
+      if (!adjCounts[a]) adjCounts[a] = { count: 0, examples: [] };
+      adjCounts[a].count++;
+      if (adjCounts[a].examples.length < 1) adjCounts[a].examples.push(c);
+    }));
+    const topAdjs = Object.entries(adjCounts).sort((a, b) => b[1].count - a[1].count).slice(0, 25);
+
+    // Comparisons
+    const compCounts = {};
+    classified.forEach(c => c.comparisons.forEach(comp => { compCounts[comp] = (compCounts[comp] || 0) + 1; }));
+    const topComps = Object.entries(compCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    // Per-sub breakdown
+    const subBreakdown = Object.entries(subResults).map(([sub, comments]) => {
+      const cls = comments.map(c => classifySentiment(c.body || ''));
+      const p = cls.filter(c => c.sentiment === 'positive').length;
+      const n = cls.filter(c => c.sentiment === 'negative').length;
+      const t = comments.length;
+      return { sub, total: t, posP: t?Math.round(p/t*100):0, negP: t?Math.round(n/t*100):0, neuP: t?Math.round((t-p-n)/t*100):0, score: t?Math.round((p-n)/t*100):0 };
+    });
+
+    const positiveComments = [...classified].filter(c => c.sentiment === 'positive').sort((a, b) => b.posCount - a.posCount).slice(0, 10);
+    const negativeComments = [...classified].filter(c => c.sentiment === 'negative').sort((a, b) => b.negCount - a.negCount).slice(0, 10);
+
+    // Build HTML
+    let html = '';
+    if (skippedSubs.length) html += `<div class="error-msg">Could not fetch from r/${skippedSubs.join(', r/')}. Showing partial results.</div>`;
+
+    // Donut + Gauge row
+    html += `<div class="compare-grid" style="margin-bottom:16px">
+      <div class="chart-container"><canvas id="sentimentDonut"></canvas></div>
+      <div class="chart-container sentiment-gauge">
+        <div style="font-size:0.85rem;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">Sentiment Score</div>
+        <div class="gauge-score" style="color:${sentimentScore>=20?'var(--success)':sentimentScore<=-20?'var(--danger)':'#333'}">${sentimentScore>0?'+':''}${sentimentScore}</div>
+        <div class="gauge-bar"><div class="gauge-marker" style="left:${50+sentimentScore/2}%"></div></div>
+        <div style="display:flex;justify-content:space-between;width:80%;font-size:0.7rem;color:var(--text-muted);margin-top:6px"><span>-100</span><span>0</span><span>+100</span></div>
+        <div class="stat-grid" style="width:100%;margin-top:16px">
+          <div class="stat-card"><div class="stat-value" style="color:var(--success)">${posCount}</div><div class="stat-label">Positive</div></div>
+          <div class="stat-card"><div class="stat-value" style="color:var(--danger)">${negCount}</div><div class="stat-label">Negative</div></div>
+          <div class="stat-card"><div class="stat-value">${neutralCount}</div><div class="stat-label">Neutral</div></div>
+        </div>
+      </div>
+    </div>`;
+
+    // Adjective word cloud + table
+    if (topAdjs.length) {
+      html += `<div class="card"><div class="card-title">How Reddit Describes "${escapeHtml(player)}"</div>
+        <div class="word-cloud">${topAdjs.map(([word, data]) => {
+          const info = ADJECTIVE_MAP[word] || { sentiment: 'neutral' };
+          const size = 0.8 + (data.count / (topAdjs[0]?.[1]?.count || 1)) * 1.2;
+          const color = info.sentiment === 'positive' ? 'var(--success)' : info.sentiment === 'negative' ? 'var(--danger)' : '#2563eb';
+          return `<span class="word-tag" style="font-size:${size}rem;color:${color};border-color:${color}40">${escapeHtml(word)} (${data.count})</span>`;
+        }).join('')}</div>
+        <div class="table-wrap"><table><thead><tr><th>Word</th><th>Count</th><th>Sentiment</th><th>Example</th></tr></thead>
+        <tbody>${topAdjs.map(([word, data]) => {
+          const info = ADJECTIVE_MAP[word] || { sentiment: 'neutral' };
+          const badge = info.sentiment === 'positive' ? 'badge-green' : info.sentiment === 'negative' ? 'badge-red' : 'badge-blue';
+          const ex = data.examples[0];
+          return `<tr><td><strong>${escapeHtml(word)}</strong></td><td>${data.count}</td><td><span class="badge ${badge}">${info.sentiment}</span></td>
+            <td style="max-width:400px">${ex ? `<a href="${commentPermalink(ex)}" target="_blank" style="font-size:0.8rem">${escapeHtml(truncate(ex.body||'',120))}</a>` : ''}</td></tr>`;
+        }).join('')}</tbody></table></div></div>`;
+    }
+
+    // Comparisons
+    if (topComps.length) {
+      html += `<div class="card"><div class="card-title">Player Comparisons</div>
+        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:8px">Reddit compares ${escapeHtml(player)} to:</p>
+        <div class="word-cloud">${topComps.map(([name, count]) =>
+          `<span class="word-tag" style="font-size:${0.9+(count/(topComps[0]?.[1]||1))*0.8}rem">"The next ${escapeHtml(name)}" (${count})</span>`
+        ).join('')}</div></div>`;
+    }
+
+    // Positive / Negative columns
+    html += `<div class="compare-grid">
+      <div class="card"><div class="card-title" style="color:var(--success)">Most Positive Comments</div>
+        ${positiveComments.length ? positiveComments.map(c =>
+          `<a href="${commentPermalink(c)}" target="_blank" class="clickable-comment"><div class="comment-card"><div class="comment-body comment-scroll">${escapeHtml(c.body||'')}</div>
+            <div class="comment-meta"><span>u/${escapeHtml(c.author||'[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>r/${escapeHtml(c.subreddit)}</span><span>${formatDate(c.created_utc)}</span></div></div></a>`
+        ).join('') : '<div class="empty-state">None found.</div>'}
+      </div>
+      <div class="card"><div class="card-title" style="color:var(--danger)">Most Negative Comments</div>
+        ${negativeComments.length ? negativeComments.map(c =>
+          `<a href="${commentPermalink(c)}" target="_blank" class="clickable-comment"><div class="comment-card" style="border-left-color:var(--danger)"><div class="comment-body comment-scroll">${escapeHtml(c.body||'')}</div>
+            <div class="comment-meta"><span>u/${escapeHtml(c.author||'[deleted]')}</span><span>Score: ${(c.score||0).toLocaleString()}</span><span>r/${escapeHtml(c.subreddit)}</span><span>${formatDate(c.created_utc)}</span></div></div></a>`
+        ).join('') : '<div class="empty-state">None found.</div>'}
+      </div>
+    </div>`;
+
+    // Sub breakdown
+    html += `<div class="card"><div class="card-title">Perception by Subreddit</div>
+      <div class="chart-container"><canvas id="subSentimentChart"></canvas></div>
+      <div class="table-wrap"><table><thead><tr><th>Subreddit</th><th>Comments</th><th>Positive</th><th>Negative</th><th>Neutral</th><th>Score</th></tr></thead>
+      <tbody>${subBreakdown.map(s => `<tr><td>r/${escapeHtml(s.sub)}</td><td>${s.total}</td>
+        <td style="color:var(--success)">${s.posP}%</td><td style="color:var(--danger)">${s.negP}%</td><td>${s.neuP}%</td>
+        <td style="color:${s.score>=0?'var(--success)':'var(--danger)'};font-weight:600">${s.score>0?'+':''}${s.score}</td></tr>`).join('')}</tbody></table></div>
+    </div>`;
 
     resultsEl.innerHTML = html;
-    getOrCreateChart('perceptionChart', {
+
+    getOrCreateChart('sentimentDonut', {
+      type: 'doughnut',
+      data: { labels: ['Positive','Negative','Neutral'], datasets: [{ data: [posCount, negCount, neutralCount], backgroundColor: ['#16a34a','#dc2626','#9ca3af'], borderWidth: 0 }] },
+      options: { responsive: true, plugins: { title: { display: true, text: `"${player}" Sentiment Breakdown`, color: '#333' }, legend: { position: 'bottom' } } }
+    });
+
+    getOrCreateChart('subSentimentChart', {
       type: 'bar',
-      data: {
-        labels: subStats.map(s => 'r/' + s.sub),
-        datasets: [{ label: 'Average Comment Score', data: subStats.map(s => s.avgScore), backgroundColor: CHART_COLORS.slice(0, subStats.length) }]
-      },
-      options: { responsive: true, plugins: { title: { display: true, text: `"${player}" Perception by Subreddit`, color: '#1a1a2e' } }, scales: { y: { beginAtZero: true } } }
+      data: { labels: subBreakdown.map(s => 'r/'+s.sub), datasets: [
+        { label: 'Positive %', data: subBreakdown.map(s => s.posP), backgroundColor: '#16a34a' },
+        { label: 'Negative %', data: subBreakdown.map(s => s.negP), backgroundColor: '#dc2626' },
+        { label: 'Neutral %', data: subBreakdown.map(s => s.neuP), backgroundColor: '#9ca3af' }
+      ]},
+      options: { responsive: true, plugins: { title: { display: true, text: 'Sentiment by Subreddit', color: '#333' } }, scales: { x: { stacked: true }, y: { stacked: true, max: 100 } } }
     });
   } catch (err) {
     showError(resultsEl, 'Error analyzing perception: ' + err.message);
@@ -1448,8 +1710,8 @@ async function findViralTakes() {
   showLoading(resultsEl);
 
   try {
-    const res = await api('/comments/search', {
-      subreddit: 'nba', body: query, after, before, limit: 100,
+    const res = await apiWithRetry('/comments/search', {
+      subreddit: 'nba', body: query, after, before, limit: 25,
       fields: 'id,body,subreddit,score,author,created_utc,link_id'
     });
     socialData = (res.data || []).filter(c => (c.score || 0) >= minScore)
@@ -1462,19 +1724,18 @@ async function findViralTakes() {
 
     resultsEl.innerHTML = `<p style="color:var(--text-secondary);margin-bottom:12px">${socialData.length} viral takes found (score >= ${minScore})</p>` +
       socialData.map((c, i) => {
-        return `<div class="comment-card">
+        return `<a href="${commentPermalink(c)}" target="_blank" class="clickable-comment"><div class="comment-card">
           <div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
           <div class="comment-meta">
             <span>u/${escapeHtml(c.author)}</span>
             <span>Score: ${(c.score||0).toLocaleString()}</span>
             <span>r/${escapeHtml(c.subreddit)}</span>
             <span>${formatDate(c.created_utc)}</span>
-            <a href="${commentPermalink(c)}" target="_blank">View</a>
           </div>
-          <div class="comment-actions">
-            <button class="btn btn-sm btn-secondary" onclick="copySocialComment(${i})">Copy for Twitter</button>
-            <button class="btn btn-sm btn-secondary" onclick="copySocialComment(${i})">Copy for Bluesky</button>
-          </div>
+        </div></a>
+        <div class="comment-actions" style="margin-bottom:8px">
+          <button class="btn btn-sm btn-secondary" onclick="event.preventDefault();copySocialComment(${i})">Copy for Twitter</button>
+          <button class="btn btn-sm btn-secondary" onclick="event.preventDefault();copySocialComment(${i})">Copy for Bluesky</button>
         </div>`;
       }).join('');
   } catch (err) {
@@ -1667,15 +1928,17 @@ async function expandThread(postId, btn) {
     if (!comments.length) {
       threadEl.innerHTML = '<div class="empty-state">No comments found.</div>';
     } else {
-      threadEl.innerHTML = comments.slice(0, 15).map(c => `
-        <div class="comment-card">
+      threadEl.innerHTML = comments.slice(0, 15).map(c => {
+        const cLink = c.link_id ? commentPermalink(c) : '#';
+        return `<a href="${cLink}" target="_blank" class="clickable-comment"><div class="comment-card">
           <div class="comment-body comment-scroll">${escapeHtml(c.body || '')}</div>
           <div class="comment-meta">
             <span>u/${escapeHtml(c.author || '[deleted]')}</span>
             <span>Score: ${c.score || 0}</span>
             <span>${formatDate(c.created_utc)}</span>
           </div>
-        </div>`).join('');
+        </div></a>`;
+      }).join('');
     }
     threadEl.classList.add('open');
     btn.textContent = 'Collapse Thread';
@@ -1728,15 +1991,15 @@ async function generateBrief() {
 // =============================================================================
 function init() {
   const today = new Date().toISOString().split('T')[0];
-  const oneDayAgo = daysAgo(1);
+  const sixHoursAgoDate = today; // Same day for date inputs
 
-  document.getElementById('rumorAfter').value = oneDayAgo;
+  document.getElementById('rumorAfter').value = sixHoursAgoDate;
   document.getElementById('rumorBefore').value = today;
-  document.getElementById('socialAfter').value = oneDayAgo;
+  document.getElementById('socialAfter').value = sixHoursAgoDate;
   document.getElementById('socialBefore').value = today;
-  document.getElementById('sentimentAfter').value = oneDayAgo;
+  document.getElementById('sentimentAfter').value = sixHoursAgoDate;
   document.getElementById('sentimentBefore').value = today;
-  document.getElementById('historyAfter').value = oneDayAgo;
+  document.getElementById('historyAfter').value = sixHoursAgoDate;
   document.getElementById('historyBefore').value = today;
 
   const teamOptions = Object.entries(NBA_TEAMS).map(([team, sub]) =>
@@ -1756,6 +2019,9 @@ function init() {
       if (btn) btn.click();
     }
   });
+
+  // Auto-load Trend Detection tab on startup
+  setTimeout(() => loadTrends(), 300);
 }
 
 async function checkApiStatus() {
